@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    "uploads/",
+    "uploads/**",
+    "*.mp4",
+    "*.mkv",
+    "*.avi",
+    "*.webm",
+    "*.mov"
+  ],
+  "watch": ["app.js", "server.js", "modules/", "middlewares/", "config/", "common/"],
+  "ext": "js,json"
+}
