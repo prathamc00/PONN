@@ -1,45 +1,46 @@
-const mongoose = require('mongoose');
-
-const assignmentSchema = new mongoose.Schema(
-    {
-        title: {
-            type: String,
-            required: [true, 'Assignment title is required'],
-            trim: true,
+module.exports = (sequelize, DataTypes) => {
+    const Assignment = sequelize.define('Assignment', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
         },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Course',
-            required: [true, 'Course is required'],
+        title: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Assignment title is required' }
+            }
         },
         type: {
-            type: String,
-            enum: ['case_study', 'file_upload', 'code'],
-            required: [true, 'Assignment type is required'],
+            type: DataTypes.ENUM('case_study', 'file_upload', 'code'),
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Assignment type is required' }
+            }
         },
         instructions: {
-            type: String,
-            trim: true,
+            type: DataTypes.TEXT,
         },
         module: {
-            type: String,
-            trim: true,
+            type: DataTypes.STRING,
         },
         dueDate: {
-            type: Date,
-            required: [true, 'Due date is required'],
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Due date is required' }
+            }
         },
         maxMarks: {
-            type: Number,
-            min: 1,
-            default: 100,
-        },
-        createdBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
-    },
-    { timestamps: true }
-);
+            type: DataTypes.INTEGER,
+            defaultValue: 100,
+            validate: { min: 1 }
+        }
+        // course and createdBy handled by associations
+    }, {
+        timestamps: true
+    });
 
-module.exports = mongoose.model('Assignment', assignmentSchema);
+    return Assignment;
+};

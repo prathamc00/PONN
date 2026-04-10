@@ -1,9 +1,7 @@
-﻿const Course = require('./course.model');
-const CourseProgress = require('./courseProgress.model');
+const { Course, CourseProgress, Attendance } = require('../../models');
 const path = require('path');
-const Attendance = require('../attendance/attendance.model');
 
-const canManageCourse = (course, user) => user.role === 'admin' || String(course.createdBy) === String(user._id);
+const canManageCourse = (course, user) => user.role === 'admin' || String(course.createdBy) === String(user.id);
 
 const ensureCourseAccess = (course, user) => {
     if (!canManageCourse(course, user)) {
@@ -17,11 +15,16 @@ const getManagedCourses = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 100;
-        const skip = (page - 1) * limit;
+        const offset = (page - 1) * limit;
 
-        const filter = req.user.role === 'admin' ? {} : { createdBy: req.user._id };
-        const courses = await Course.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
-        res.status(200).json({ success: true, count: courses.length, page, limit, courses });
+        const where = req.user.role === 'admin' ? {} : { createdBy: req.user.id };
+        const { count, rows: courses } = await Course.findAndCountAll({
+            where,
+            order: [['createdAt', 'DESC']],
+            offset,
+            limit
+        });
+        res.status(200).json({ success: true, count, page, limit, courses });
     } catch (error) {
         next(error);
     }
@@ -31,10 +34,14 @@ const getCourses = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 100;
-        const skip = (page - 1) * limit;
+        const offset = (page - 1) * limit;
 
-        const courses = await Course.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit);
-        res.status(200).json({ success: true, count: courses.length, page, limit, courses });
+        const { count, rows: courses } = await Course.findAndCountAll({
+            order: [['createdAt', 'DESC']],
+            offset,
+            limit
+        });
+        res.status(200).json({ success: true, count, page, limit, courses });
     } catch (error) {
         next(error);
     }
@@ -42,24 +49,34 @@ const getCourses = async (req, res, next) => {
 
 const getCourseById = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id, {
+            include: ['enrolledStudents'] // using the association from index.js
+        });
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        const obj = course.toObject();
+        
+        const obj = course.toJSON();
         const isStaff = req.user && (req.user.role === 'admin' || req.user.role === 'instructor');
-        const isEnrolled = req.user ? course.enrolledStudents.some(sid => String(sid) === String(req.user._id)) : false;
+        
+        let isEnrolled = false;
+        if (req.user && obj.enrolledStudents) {
+            isEnrolled = obj.enrolledStudents.some(s => String(s.id) === String(req.user.id));
+        }
 
         // Attach isEnrolled flag for authenticated students
         if (req.user) {
             obj.isEnrolled = isEnrolled;
-            obj.enrolledCount = course.enrolledStudents.length;
+            obj.enrolledCount = obj.enrolledStudents ? obj.enrolledStudents.length : 0;
         }
 
+        // Avoid sending full user objects
+        delete obj.enrolledStudents;
+
         // Strip video/notes URLs for non-enrolled, non-staff users
-        if (!isStaff && !isEnrolled) {
+        if (!isStaff && !isEnrolled && obj.modules) {
             obj.modules = obj.modules.map(m => ({
-                _id: m._id,
+                id: m.id || m._id, // Handle potential old string IDs temporarily
                 title: m.title,
                 description: m.description,
                 duration: m.duration,
@@ -78,7 +95,7 @@ const createCourse = async (req, res, next) => {
     try {
         const data = { ...req.body };
         if (req.user) {
-            data.createdBy = req.user._id;
+            data.createdBy = req.user.id;
             if (req.user.role === 'instructor') {
                 data.instructor = req.user.name;
             }
@@ -86,8 +103,8 @@ const createCourse = async (req, res, next) => {
         const course = await Course.create(data);
         res.status(201).json({ success: true, message: 'Course created', course });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((e) => e.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((e) => e.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
         next(error);
@@ -96,7 +113,7 @@ const createCourse = async (req, res, next) => {
 
 const updateCourse = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
@@ -114,8 +131,8 @@ const updateCourse = async (req, res, next) => {
         if (error.statusCode) {
             return res.status(error.statusCode).json({ success: false, message: error.message });
         }
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((e) => e.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((e) => e.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
         next(error);
@@ -124,13 +141,13 @@ const updateCourse = async (req, res, next) => {
 
 const deleteCourse = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
 
         ensureCourseAccess(course, req.user);
-        await course.deleteOne();
+        await course.destroy();
         res.status(200).json({ success: true, message: 'Course deleted' });
     } catch (error) {
         if (error.statusCode) {
@@ -142,11 +159,12 @@ const deleteCourse = async (req, res, next) => {
 
 const getModules = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id).select('title modules');
+        const course = await Course.findByPk(req.params.id, { attributes: ['title', 'modules'] });
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        const sorted = [...course.modules].sort((a, b) => a.order - b.order);
+        const modules = course.modules || [];
+        const sorted = [...modules].sort((a, b) => a.order - b.order);
         res.status(200).json({ success: true, courseTitle: course.title, count: sorted.length, modules: sorted });
     } catch (error) {
         next(error);
@@ -155,18 +173,20 @@ const getModules = async (req, res, next) => {
 
 const addModule = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
 
         ensureCourseAccess(course, req.user);
 
+        const modules = [...(course.modules || [])];
         const moduleData = {
+            id: require('crypto').randomUUID(), // fake id for embedded JSON array items
             title: req.body.title,
             description: req.body.description || '',
             duration: req.body.duration || '',
-            order: req.body.order !== undefined ? Number(req.body.order) : course.modules.length,
+            order: req.body.order !== undefined ? Number(req.body.order) : modules.length,
         };
 
         if (req.files && req.files.video && req.files.video[0]) {
@@ -177,8 +197,9 @@ const addModule = async (req, res, next) => {
             moduleData.notesUrl = 'uploads/notes/' + req.files.notes[0].filename;
         }
 
-        course.modules.push(moduleData);
-        course.lessons = course.modules.length;
+        modules.push(moduleData);
+        course.modules = modules;
+        course.lessons = modules.length;
         await course.save();
 
         res.status(201).json({ success: true, message: 'Lesson added', course });
@@ -192,17 +213,21 @@ const addModule = async (req, res, next) => {
 
 const updateModule = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
 
         ensureCourseAccess(course, req.user);
 
-        const mod = course.modules.id(req.params.moduleId);
-        if (!mod) {
+        let modules = [...(course.modules || [])];
+        const modIndex = modules.findIndex(m => m.id === req.params.moduleId || m._id === req.params.moduleId);
+        
+        if (modIndex === -1) {
             return res.status(404).json({ success: false, message: 'Module not found' });
         }
+
+        const mod = modules[modIndex];
 
         if (req.body.title !== undefined) mod.title = req.body.title;
         if (req.body.description !== undefined) mod.description = req.body.description;
@@ -217,7 +242,13 @@ const updateModule = async (req, res, next) => {
             mod.notesUrl = 'uploads/notes/' + req.files.notes[0].filename;
         }
 
+        modules[modIndex] = mod;
+        course.modules = modules;
+        
+        // Sequelize needs explicit notification that JSON changed
+        course.changed('modules', true);
         await course.save();
+        
         res.status(200).json({ success: true, message: 'Lesson updated', course });
     } catch (error) {
         if (error.statusCode) {
@@ -229,16 +260,20 @@ const updateModule = async (req, res, next) => {
 
 const deleteModule = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
 
         ensureCourseAccess(course, req.user);
 
-        course.modules = course.modules.filter((m) => m._id.toString() !== req.params.moduleId);
-        course.modules.forEach((m, i) => { m.order = i; });
-        course.lessons = course.modules.length || 0;
+        let modules = [...(course.modules || [])];
+        modules = modules.filter((m) => String(m.id || m._id) !== String(req.params.moduleId));
+        modules.forEach((m, i) => { m.order = i; });
+        course.modules = modules;
+        course.lessons = modules.length || 0;
+        
+        course.changed('modules', true);
         await course.save();
 
         res.status(200).json({ success: true, message: 'Lesson deleted', course });
@@ -252,7 +287,7 @@ const deleteModule = async (req, res, next) => {
 
 const reorderModules = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
@@ -264,12 +299,16 @@ const reorderModules = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'moduleOrder must be an array of module IDs' });
         }
 
+        let modules = [...(course.modules || [])];
         moduleOrder.forEach((id, idx) => {
-            const mod = course.modules.id(id);
+            const mod = modules.find(m => String(m.id || m._id) === String(id));
             if (mod) mod.order = idx;
         });
 
+        course.modules = modules;
+        course.changed('modules', true);
         await course.save();
+        
         const sorted = [...course.modules].sort((a, b) => a.order - b.order);
         res.status(200).json({ success: true, message: 'Lessons reordered', modules: sorted });
     } catch (error) {
@@ -282,21 +321,22 @@ const reorderModules = async (req, res, next) => {
 
 const enrollCourse = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        const alreadyEnrolled = course.enrolledStudents.some(s => String(s) === String(req.user._id));
-        if (alreadyEnrolled) {
+        
+        const hasEnrolled = await course.hasEnrolledStudent(req.user.id);
+        if (hasEnrolled) {
             return res.status(409).json({ success: false, message: 'Already enrolled in this course' });
         }
-        course.enrolledStudents.push(req.user._id);
-        await course.save();
+        
+        await course.addEnrolledStudent(req.user.id);
 
         // Track attendance for this enrollment event
         await Attendance.create({
-            student: req.user._id,
-            course: course._id,
+            student: req.user.id,
+            course: course.id,
             activityType: 'login',
             details: `Enrolled in course: ${course.title}`,
         });
@@ -304,14 +344,16 @@ const enrollCourse = async (req, res, next) => {
         // Fire Real-Time Notification via WebSockets
         const { createNotification } = require('../notification/notification.controller');
         await createNotification(
-            req.user._id, 
+            req.user.id, 
             'Course Enrolled 🎉', 
             `You have successfully enrolled in ${course.title}. Start learning now!`,
             'success',
-            `/courses/${course._id}`
+            `/courses/${course.id}`
         );
+        
+        const enrolledCount = await course.countEnrolledStudents();
 
-        res.status(200).json({ success: true, message: 'Enrolled successfully', enrolledCount: course.enrolledStudents.length });
+        res.status(200).json({ success: true, message: 'Enrolled successfully', enrolledCount });
     } catch (error) {
         next(error);
     }
@@ -319,12 +361,11 @@ const enrollCourse = async (req, res, next) => {
 
 const unenrollCourse = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        course.enrolledStudents = course.enrolledStudents.filter(s => String(s) !== String(req.user._id));
-        await course.save();
+        await course.removeEnrolledStudent(req.user.id);
         res.status(200).json({ success: true, message: 'Unenrolled successfully' });
     } catch (error) {
         next(error);
@@ -333,15 +374,25 @@ const unenrollCourse = async (req, res, next) => {
 
 const getMyEnrollments = async (req, res, next) => {
     try {
-        const courses = await Course.find({ enrolledStudents: req.user._id }).sort({ createdAt: -1 });
+        // Query courses through the User model's association
+        const { User } = require('../../models');
+        const user = await User.findByPk(req.user.id, {
+            include: [{
+                model: Course,
+                as: 'enrolledCourses',
+                through: { attributes: [] }
+            }]
+        });
+        const courses = user ? user.enrolledCourses : [];
         res.status(200).json({ success: true, count: courses.length, courses });
     } catch (error) {
         next(error);
     }
 };
+
 const getCourseProgress = async (req, res, next) => {
     try {
-        const progress = await CourseProgress.findOne({ student: req.user._id, course: req.params.id });
+        const progress = await CourseProgress.findOne({ where: { student: req.user.id, course: req.params.id } });
         res.status(200).json({ success: true, completedModules: progress ? progress.completedModules : [] });
     } catch (error) {
         next(error);
@@ -350,23 +401,28 @@ const getCourseProgress = async (req, res, next) => {
 
 const markModuleComplete = async (req, res, next) => {
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findByPk(req.params.id);
         if (!course) {
             return res.status(404).json({ success: false, message: 'Course not found' });
         }
-        const mod = course.modules.id(req.params.moduleId);
+        
+        const modules = course.modules || [];
+        const mod = modules.find(m => String(m.id || m._id) === String(req.params.moduleId));
         if (!mod) {
             return res.status(404).json({ success: false, message: 'Module not found' });
         }
 
-        let progress = await CourseProgress.findOne({ student: req.user._id, course: req.params.id });
+        let progress = await CourseProgress.findOne({ where: { student: req.user.id, course: req.params.id } });
         if (!progress) {
-            progress = await CourseProgress.create({ student: req.user._id, course: req.params.id, completedModules: [] });
+            progress = await CourseProgress.create({ student: req.user.id, course: req.params.id, completedModules: [] });
         }
 
         const alreadyDone = progress.completedModules.some(mid => String(mid) === String(req.params.moduleId));
         if (!alreadyDone) {
-            progress.completedModules.push(req.params.moduleId);
+            let completed = [...progress.completedModules];
+            completed.push(req.params.moduleId);
+            progress.completedModules = completed;
+            progress.changed('completedModules', true);
             await progress.save();
         }
 

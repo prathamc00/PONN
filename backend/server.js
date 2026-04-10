@@ -2,10 +2,23 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = require('./app');
-const connectDB = require('./config/db');
+const { sequelize } = require('./models');
 const logger = require('./config/logger');
 
-connectDB();
+// Authenticate and sync all models
+const initDB = async () => {
+    try {
+        await sequelize.authenticate();
+        logger.info('MySQL DB connected successfully via Sequelize');
+        await sequelize.sync({ alter: true });
+        logger.info('All models were synchronized successfully.');
+    } catch (error) {
+        logger.error('MySQL connection error', { message: error.message });
+        process.exit(1);
+    }
+};
+
+initDB();
 
 const PORT = Number(process.env.PORT) || 5000;
 

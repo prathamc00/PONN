@@ -1,4 +1,4 @@
-const Attendance = require('./attendance.model');
+const { Attendance, Course, User } = require('../../models');
 
 const trackActivity = async (req, res, next) => {
     try {
@@ -9,17 +9,16 @@ const trackActivity = async (req, res, next) => {
         }
 
         const record = await Attendance.create({
-            student: req.user._id,
+            student: req.user.id,
             course: courseId || null,
             activityType,
-            // Coerce to string and cap length to prevent NoSQL injection / oversized payloads
             details: typeof details === 'string' ? details.trim().substring(0, 500) : '',
         });
 
         res.status(201).json({ success: true, message: 'Activity tracked', record });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((e) => e.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((e) => e.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
         next(error);
@@ -28,9 +27,11 @@ const trackActivity = async (req, res, next) => {
 
 const getMyAttendance = async (req, res, next) => {
     try {
-        const records = await Attendance.find({ student: req.user._id })
-            .populate('course', 'title')
-            .sort({ createdAt: -1 });
+        const records = await Attendance.findAll({
+            where: { student: req.user.id },
+            include: [{ model: Course, attributes: ['title'] }],
+            order: [['createdAt', 'DESC']]
+        });
 
         res.status(200).json({ success: true, count: records.length, records });
     } catch (error) {
@@ -40,10 +41,14 @@ const getMyAttendance = async (req, res, next) => {
 
 const getCourseAttendance = async (req, res, next) => {
     try {
-        const records = await Attendance.find({ course: req.params.courseId })
-            .populate('student', 'name email')
-            .populate('course', 'title')
-            .sort({ createdAt: -1 });
+        const records = await Attendance.findAll({
+            where: { course: req.params.courseId },
+            include: [
+                { model: User, attributes: ['name', 'email'] },
+                { model: Course, attributes: ['title'] }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
 
         res.status(200).json({ success: true, count: records.length, records });
     } catch (error) {
@@ -53,10 +58,13 @@ const getCourseAttendance = async (req, res, next) => {
 
 const getAllAttendance = async (req, res, next) => {
     try {
-        const records = await Attendance.find({})
-            .populate('student', 'name email')
-            .populate('course', 'title')
-            .sort({ createdAt: -1 });
+        const records = await Attendance.findAll({
+            include: [
+                { model: User, attributes: ['name', 'email'] },
+                { model: Course, attributes: ['title'] }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
 
         res.status(200).json({ success: true, count: records.length, records });
     } catch (error) {

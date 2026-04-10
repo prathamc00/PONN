@@ -25,7 +25,7 @@ const registerRules = [
     body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }).withMessage('Name must be under 100 characters'),
     body('email').trim().isEmail().withMessage('Please provide a valid email').normalizeEmail(),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-    body('phone').optional({ checkFalsy: true }).matches(/^\d{10}$/).withMessage('Phone must be exactly 10 digits'),
+    body('phone').optional({ checkFalsy: true }).matches(/^\+?[\d\s-]{10,15}$/).withMessage('Phone must be a valid number (10-15 digits)'),
     body('semester').optional({ checkFalsy: true }).isInt({ min: 1, max: 8 }).withMessage('Semester must be between 1 and 8'),
 ];
 

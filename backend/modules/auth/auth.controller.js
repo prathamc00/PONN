@@ -1,4 +1,4 @@
-const User = require('./auth.model');
+const { User, Course } = require('../../models');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const nodemailer = require('nodemailer');
@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const buildUserPayload = (user) => ({
-    id: user._id,
+    id: user.id || user._id, // Fallback just in case
     name: user.name,
     email: user.email,
     college: user.college,
@@ -59,7 +59,7 @@ const register = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
         }
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             return res.status(409).json({ success: false, message: 'Email is already registered' });
         }
@@ -76,7 +76,7 @@ const register = async (req, res, next) => {
             });
         }
 
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         res.status(201).json({
             success: true,
@@ -85,8 +85,8 @@ const register = async (req, res, next) => {
             user: buildUserPayload(user),
         });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((e) => e.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((e) => e.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
         next(error);
@@ -101,7 +101,7 @@ const login = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide email and password' });
         }
 
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.scope('withPassword').findOne({ where: { email } });
         if (!user) {
             return res.status(401).json({ success: false, message: 'Invalid email or password' });
         }
@@ -121,7 +121,7 @@ const login = async (req, res, next) => {
             return res.status(403).json({ success: false, message, approvalStatus });
         }
 
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         res.status(200).json({
             success: true,
@@ -136,7 +136,15 @@ const login = async (req, res, next) => {
 
 const getMe = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id).populate('enrolledCourses', 'title category level');
+        const user = await User.findByPk(req.user.id, {
+            include: [{
+                model: Course,
+                as: 'enrolledCourses',
+                attributes: ['id', 'title', 'category', 'level'],
+                through: { attributes: [] }
+            }]
+        });
+
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -163,10 +171,11 @@ const updateProfile = async (req, res, next) => {
             }
         }
 
-        const user = await User.findByIdAndUpdate(req.user.id, updates, {
-            new: true,
-            runValidators: true,
+        await User.update(updates, {
+            where: { id: req.user.id }
         });
+
+        const user = await User.findByPk(req.user.id);
 
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -178,8 +187,8 @@ const updateProfile = async (req, res, next) => {
             user: buildUserPayload(user),
         });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((e) => e.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((e) => e.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
         next(error);
@@ -193,11 +202,13 @@ const uploadAadhaar = async (req, res, next) => {
         }
 
         const filePath = 'uploads/aadhaar/' + req.file.filename;
-        const user = await User.findByIdAndUpdate(
-            req.user.id,
+
+        await User.update(
             { aadhaarCardPath: filePath, aadhaarVerified: false },
-            { new: true }
+            { where: { id: req.user.id } }
         );
+
+        const user = await User.findByPk(req.user.id);
 
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
@@ -215,17 +226,20 @@ const uploadAadhaar = async (req, res, next) => {
 
 const enrollCourse = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findByPk(req.user.id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        if (user.enrolledCourses.includes(req.params.courseId)) {
+        // With Sequelize many-to-many, we use helper methods
+        const courseId = req.params.courseId;
+        const hasCourse = await user.hasEnrolledCourse(courseId);
+
+        if (hasCourse) {
             return res.status(409).json({ success: false, message: 'Already enrolled in this course' });
         }
 
-        user.enrolledCourses.push(req.params.courseId);
-        await user.save();
+        await user.addEnrolledCourse(courseId);
 
         res.status(200).json({ success: true, message: 'Enrolled successfully' });
     } catch (error) {
@@ -240,16 +254,16 @@ const forgotPassword = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide an email address' });
         }
 
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.scope('withPassword').findOne({ where: { email } });
         if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'No account found with that email address. Please check for typos or register a new account.' 
+            return res.status(404).json({
+                success: false,
+                message: 'No account found with that email address. Please check for typos or register a new account.'
             });
         }
 
         const secret = process.env.JWT_SECRET + user.password;
-        const resetToken = jwt.sign({ id: user._id }, secret, { expiresIn: '15m' });
+        const resetToken = jwt.sign({ id: user.id }, secret, { expiresIn: '15m' });
         const resetLink = `${getResetPageBaseUrl(req)}?token=${encodeURIComponent(resetToken)}`;
 
         logger.debug(`[Password Reset] Reset link generated for ${email}`);
@@ -261,22 +275,13 @@ const forgotPassword = async (req, res, next) => {
             html: `
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 32px; background: #ffffff; border-radius: 16px;">
                     <div style="text-align: center; margin-bottom: 32px;">
-                        <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #6C63FF, #7C3AED); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                            <span style="color: #fff; font-size: 24px; font-weight: 800;">C</span>
-                        </div>
                         <h2 style="color: #1A1A2E; font-size: 22px; margin: 0 0 8px;">Password Reset</h2>
-                        <p style="color: #64748b; font-size: 14px; margin: 0;">You requested a password reset for your CRISMATECH account.</p>
                     </div>
                     <div style="text-align: center; margin: 32px 0;">
-                        <a href="${resetLink}" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #6C63FF, #7C3AED); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(108, 99, 255, 0.3);">
+                        <a href="${resetLink}" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #6C63FF, #7C3AED); color: #ffffff; text-decoration: none; border-radius: 10px;">
                             Reset Password
                         </a>
                     </div>
-                    <p style="color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.6;">
-                        This link expires in <strong>15 minutes</strong>. If you didn't request this, you can safely ignore this email.
-                    </p>
-                    <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;">
-                    <p style="color: #cbd5e1; font-size: 12px; text-align: center;">© CRISMATECH Learning Portal</p>
                 </div>
             `,
         });
@@ -304,7 +309,7 @@ const validateResetToken = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
         }
 
-        const user = await User.findById(decodedUnverified.id).select('+password');
+        const user = await User.scope('withPassword').findByPk(decodedUnverified.id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'Invalid or expired reset token' });
         }
@@ -334,7 +339,7 @@ const resetPassword = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
         }
 
-        const user = await User.findById(decodedUnverified.id).select('+password');
+        const user = await User.scope('withPassword').findByPk(decodedUnverified.id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'Invalid or expired reset token' });
         }
@@ -346,6 +351,7 @@ const resetPassword = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
         }
 
+        // Change password directly and fire hook
         user.password = newPassword;
         await user.save();
 
@@ -354,8 +360,8 @@ const resetPassword = async (req, res, next) => {
             message: 'Password has been reset successfully. You can now login with your new password.',
         });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((entry) => entry.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((entry) => entry.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
         next(error);
@@ -375,7 +381,7 @@ const loginInstructor = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide email and password' });
         }
 
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.scope('withPassword').findOne({ where: { email } });
         if (!user) {
             return res.status(401).json({ success: false, message: 'Invalid email or password' });
         }
@@ -398,7 +404,7 @@ const loginInstructor = async (req, res, next) => {
             return res.status(403).json({ success: false, message, approvalStatus });
         }
 
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         res.status(200).json({
             success: true,

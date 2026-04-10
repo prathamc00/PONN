@@ -1,8 +1,6 @@
 const { randomInt } = require('crypto');
 const nodemailer = require('nodemailer');
-const User = require('../auth/auth.model');
-const Otp = require('./otp.model');
-const { MAX_OTP_ATTEMPTS } = require('./otp.model');
+const { User, Otp } = require('../../models');
 const logger = require('../../config/logger');
 
 // Educational email domain validation
@@ -49,13 +47,13 @@ const sendEmailOtp = async (req, res, next) => {
             });
         }
 
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
         if (existingUser) {
             return res.status(409).json({ success: false, message: 'Email is already registered' });
         }
 
         // Delete any previous OTPs for this email before issuing a fresh one
-        await Otp.deleteMany({ email: email.toLowerCase() });
+        await Otp.destroy({ where: { email: email.toLowerCase() } });
 
         const code = generateOtp();
         await Otp.create({ email: email.toLowerCase(), code });
@@ -91,18 +89,25 @@ const verifyEmailOtp = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Email and code are required' });
         }
 
-        const otpRecord = await Otp.findOne({ email: email.toLowerCase() });
+        const otpRecord = await Otp.findOne({ where: { email: email.toLowerCase() } });
 
         if (!otpRecord) {
             return res.status(400).json({ success: false, message: 'Invalid or expired OTP code. Please request a new one.' });
+        }
+        
+        if (new Date() > new Date(otpRecord.expiresAt)) {
+            await otpRecord.destroy();
+            return res.status(400).json({ success: false, message: 'OTP code has expired. Please request a new one.' });
         }
 
         // Increment attempt counter
         otpRecord.attempts += 1;
 
+        const MAX_OTP_ATTEMPTS = Otp.MAX_OTP_ATTEMPTS || 5;
+
         // Lockout after max attempts — destroy the OTP so attacker cannot keep guessing
         if (otpRecord.attempts > MAX_OTP_ATTEMPTS) {
-            await Otp.deleteOne({ _id: otpRecord._id });
+            await otpRecord.destroy();
             return res.status(429).json({
                 success: false,
                 message: 'Too many incorrect attempts. Please request a new OTP.',
@@ -119,7 +124,7 @@ const verifyEmailOtp = async (req, res, next) => {
         }
 
         // Correct code — delete the OTP record and return success
-        await Otp.deleteOne({ _id: otpRecord._id });
+        await otpRecord.destroy();
         res.status(200).json({ success: true, message: 'Email verified successfully' });
     } catch (error) {
         next(error);

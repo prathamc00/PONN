@@ -1,27 +1,22 @@
-const mongoose = require('mongoose');
-
-const attendanceSchema = new mongoose.Schema(
-    {
-        student: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
-        },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Course',
+module.exports = (sequelize, DataTypes) => {
+    const Attendance = sequelize.define('Attendance', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
         },
         activityType: {
-            type: String,
-            enum: ['login', 'video_watch', 'material_access', 'module_complete'],
-            required: true,
+            type: DataTypes.ENUM('login', 'video_watch', 'material_access', 'module_complete'),
+            allowNull: false
         },
         details: {
-            type: String,
-            trim: true,
-        },
-    },
-    { timestamps: true }
-);
+            type: DataTypes.STRING,
+            allowNull: true
+        }
+        // student and course are defined in associations
+    }, {
+        timestamps: true
+    });
 
-module.exports = mongoose.model('Attendance', attendanceSchema);
+    return Attendance;
+};

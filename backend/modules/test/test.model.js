@@ -1,53 +1,47 @@
-const mongoose = require('mongoose');
-
-const questionSchema = new mongoose.Schema({
-    question: { type: String, required: true },
-    options: [{ type: String, required: true }],
-    correctAnswer: { type: Number, required: true, min: 0 },
-});
-
-const testSchema = new mongoose.Schema(
-    {
+module.exports = (sequelize, DataTypes) => {
+    const Test = sequelize.define('Test', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
         title: {
-            type: String,
-            required: [true, 'Test title is required'],
-            trim: true,
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Test title is required' }
+            }
         },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Course',
-            required: [true, 'Course is required'],
+        questions: {
+            type: DataTypes.JSON,
+            defaultValue: []
         },
-        questions: [questionSchema],
         totalQuestions: {
-            type: Number,
-            min: 1,
-            required: true,
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: { min: 1 }
         },
         durationMinutes: {
-            type: Number,
-            min: 1,
-            required: true,
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: { min: 1 }
         },
         startTime: {
-            type: Date,
-            required: [true, 'Start time is required'],
+            type: DataTypes.DATE,
+            allowNull: false
         },
         endTime: {
-            type: Date,
-            required: [true, 'End time is required'],
+            type: DataTypes.DATE,
+            allowNull: false
         },
         status: {
-            type: String,
-            enum: ['upcoming', 'active', 'completed'],
-            default: 'upcoming',
-        },
-        createdBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
-    },
-    { timestamps: true }
-);
+            type: DataTypes.ENUM('upcoming', 'active', 'completed'),
+            defaultValue: 'upcoming'
+        }
+        // course and createdBy handled by associations
+    }, {
+        timestamps: true
+    });
 
-module.exports = mongoose.model('Test', testSchema);
+    return Test;
+};

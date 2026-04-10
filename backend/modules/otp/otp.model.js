@@ -1,28 +1,37 @@
-const mongoose = require('mongoose');
-
 const MAX_OTP_ATTEMPTS = 5;
 
-const otpSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        lowercase: true,
-        trim: true,
-    },
-    code: {
-        type: String,
-        required: true,
-    },
-    attempts: {
-        type: Number,
-        default: 0,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        expires: 300, // Document automatically expires after 5 minutes
-    },
-});
+module.exports = (sequelize, DataTypes) => {
+    const Otp = sequelize.define('Otp', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true,
+                isEmail: true
+            }
+        },
+        code: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        attempts: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        expiresAt: {
+            type: DataTypes.DATE,
+            defaultValue: () => new Date(Date.now() + 300000) // 5 minutes
+        }
+    }, {
+        timestamps: true
+    });
 
-module.exports = mongoose.model('Otp', otpSchema);
-module.exports.MAX_OTP_ATTEMPTS = MAX_OTP_ATTEMPTS;
+    Otp.MAX_OTP_ATTEMPTS = MAX_OTP_ATTEMPTS;
+
+    return Otp;
+};

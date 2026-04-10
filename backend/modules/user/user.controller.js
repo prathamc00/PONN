@@ -1,13 +1,17 @@
-﻿const User = require('../auth/auth.model');
+const { User } = require('../../models');
 
 const getUsers = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 100;
-        const skip = (page - 1) * limit;
+        const offset = (page - 1) * limit;
 
-        const users = await User.find({}).select('-password').sort({ createdAt: -1 }).skip(skip).limit(limit);
-        res.status(200).json({ success: true, count: users.length, page, limit, users });
+        const { count, rows: users } = await User.findAndCountAll({
+            offset,
+            limit,
+            order: [['createdAt', 'DESC']]
+        });
+        res.status(200).json({ success: true, count, page, limit, users });
     } catch (error) {
         next(error);
     }
@@ -15,11 +19,12 @@ const getUsers = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id);
+        const user = await User.findByPk(req.params.id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        await user.destroy();
         res.status(200).json({ success: true, message: 'User deleted successfully' });
     } catch (error) {
         next(error);
@@ -34,7 +39,7 @@ const updateInstructorStatus = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Invalid approval status' });
         }
 
-        const user = await User.findById(req.params.id).select('-password');
+        const user = await User.findByPk(req.params.id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -54,7 +59,7 @@ const updateInstructorStatus = async (req, res, next) => {
 
 const exportUsersCSV = async (req, res, next) => {
     try {
-        const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+        const users = await User.findAll({ order: [['createdAt', 'DESC']] });
 
         let csv = 'Name,Email,Role,College,Branch,Semester,Phone,Status,Joined Date\n';
 
@@ -83,7 +88,7 @@ const exportUsersCSV = async (req, res, next) => {
 const verifyAadhaar = async (req, res, next) => {
     try {
         const { aadhaarVerified } = req.body;
-        const user = await User.findById(req.params.id).select('-password');
+        const user = await User.findByPk(req.params.id);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
         
         user.aadhaarVerified = aadhaarVerified;
@@ -103,7 +108,7 @@ const addInstructor = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
         }
 
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ where: { email } });
         if (userExists) {
             return res.status(400).json({ success: false, message: 'User already exists' });
         }
@@ -114,14 +119,14 @@ const addInstructor = async (req, res, next) => {
             password,
             phone,
             role: 'instructor',
-            approvalStatus: 'approved'
+            approvalStatus: 'approved' // assuming hooks defaults to approved
         });
 
         res.status(201).json({
             success: true,
             message: 'Instructor created successfully',
             instructor: {
-                _id: instructor._id,
+                id: instructor.id,
                 name: instructor.name,
                 email: instructor.email,
                 role: instructor.role

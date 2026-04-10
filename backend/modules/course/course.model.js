@@ -1,65 +1,61 @@
-const mongoose = require('mongoose');
-
-const moduleSchema = new mongoose.Schema({
-    title: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
-    videoUrl: { type: String },
-    notesUrl: { type: String },
-    duration: { type: String, default: '' }, // e.g. "12:30" or "1h 15m"
-    order: { type: Number, default: 0 },
-});
-
-const courseSchema = new mongoose.Schema(
-    {
+module.exports = (sequelize, DataTypes) => {
+    const Course = sequelize.define('Course', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
         title: {
-            type: String,
-            required: [true, 'Course title is required'],
-            trim: true,
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Course title is required' }
+            }
         },
         description: {
-            type: String,
-            trim: true,
+            type: DataTypes.TEXT,
         },
         instructor: {
-            type: String,
-            required: [true, 'Instructor is required'],
-            trim: true,
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Instructor is required' }
+            }
         },
         category: {
-            type: String,
-            required: [true, 'Category is required'],
-            trim: true,
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Category is required' }
+            }
         },
         level: {
-            type: String,
-            enum: ['Beginner', 'Intermediate', 'Advanced'],
-            default: 'Beginner',
+            type: DataTypes.ENUM('Beginner', 'Intermediate', 'Advanced'),
+            defaultValue: 'Beginner'
         },
         lessons: {
-            type: Number,
-            min: 1,
-            default: 1,
+            type: DataTypes.INTEGER,
+            defaultValue: 1,
+            validate: { min: 1 }
         },
         durationHours: {
-            type: Number,
-            min: 1,
-            default: 1,
+            type: DataTypes.INTEGER,
+            defaultValue: 1,
+            validate: { min: 1 }
         },
         isActive: {
-            type: Boolean,
-            default: true,
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
         },
-        modules: [moduleSchema],
-        createdBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
-        enrolledStudents: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        }],
-    },
-    { timestamps: true }
-);
+        // We use JSON for embedded arrays if they don't need complex relational queries
+        modules: {
+            type: DataTypes.JSON,
+            defaultValue: []
+        }
+        // createdBy and enrolledStudents are handled by associations in models/index.js
+    }, {
+        timestamps: true
+    });
 
-module.exports = mongoose.model('Course', courseSchema);
+    return Course;
+};

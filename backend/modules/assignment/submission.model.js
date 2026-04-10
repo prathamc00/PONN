@@ -1,49 +1,44 @@
-const mongoose = require('mongoose');
-
-const submissionSchema = new mongoose.Schema(
-    {
-        assignment: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Assignment',
-            required: true,
-        },
-        student: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
+module.exports = (sequelize, DataTypes) => {
+    const Submission = sequelize.define('Submission', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
         },
         type: {
-            type: String,
-            enum: ['case_study', 'file_upload', 'code'],
-            required: true,
+            type: DataTypes.ENUM('case_study', 'file_upload', 'code'),
+            allowNull: false
         },
         textContent: {
-            type: String,
-            trim: true,
+            type: DataTypes.TEXT
         },
         filePath: {
-            type: String,
+            type: DataTypes.STRING
         },
         codeContent: {
-            type: String,
+            type: DataTypes.TEXT
         },
         submittedAt: {
-            type: Date,
-            default: Date.now,
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW
         },
         grade: {
-            type: Number,
-            min: 0,
+            type: DataTypes.FLOAT, // Assuming grades might be floats or integers
+            validate: { min: 0 }
         },
         feedback: {
-            type: String,
-            trim: true,
-        },
-    },
-    { timestamps: true }
-);
+            type: DataTypes.TEXT
+        }
+        // assignment and student are handled via associations
+    }, {
+        timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['assignment', 'student'] // Use associated keys
+            }
+        ]
+    });
 
-// One submission per student per assignment
-submissionSchema.index({ assignment: 1, student: 1 }, { unique: true });
-
-module.exports = mongoose.model('Submission', submissionSchema);
+    return Submission;
+};

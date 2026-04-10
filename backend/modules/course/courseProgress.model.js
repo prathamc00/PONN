@@ -1,25 +1,24 @@
-const mongoose = require('mongoose');
-
-const courseProgressSchema = new mongoose.Schema(
-    {
-        student: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
+module.exports = (sequelize, DataTypes) => {
+    const CourseProgress = sequelize.define('CourseProgress', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
         },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Course',
-            required: true,
-        },
-        completedModules: [{
-            type: mongoose.Schema.Types.ObjectId,
-        }],
-    },
-    { timestamps: true }
-);
+        completedModules: {
+            type: DataTypes.JSON, // Stores array of module IDs (which are now string/UUID)
+            defaultValue: []
+        }
+        // student and course are handled via associations
+    }, {
+        timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['student', 'course']
+            }
+        ]
+    });
 
-// One progress record per student per course
-courseProgressSchema.index({ student: 1, course: 1 }, { unique: true });
-
-module.exports = mongoose.model('CourseProgress', courseProgressSchema);
+    return CourseProgress;
+};

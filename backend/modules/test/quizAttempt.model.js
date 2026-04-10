@@ -1,49 +1,45 @@
-const mongoose = require('mongoose');
-
-const quizAttemptSchema = new mongoose.Schema(
-    {
-        quiz: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Test',
-            required: true,
+module.exports = (sequelize, DataTypes) => {
+    const QuizAttempt = sequelize.define('QuizAttempt', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
         },
-        student: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
+        answers: {
+            type: DataTypes.JSON,
+            defaultValue: []
         },
-        answers: [
-            {
-                questionIndex: { type: Number, required: true },
-                selectedAnswer: { type: Number, required: true },
-            },
-        ],
         score: {
-            type: Number,
-            min: 0,
-            default: 0,
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            validate: { min: 0 }
         },
         totalMarks: {
-            type: Number,
-            min: 0,
-            default: 0,
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            validate: { min: 0 }
         },
         tabSwitchCount: {
-            type: Number,
-            default: 0,
+            type: DataTypes.INTEGER,
+            defaultValue: 0
         },
         startedAt: {
-            type: Date,
-            default: Date.now,
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW
         },
         completedAt: {
-            type: Date,
-        },
-    },
-    { timestamps: true }
-);
+            type: DataTypes.DATE
+        }
+        // quiz and student handled by associations
+    }, {
+        timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['quiz', 'student']
+            }
+        ]
+    });
 
-// One attempt per student per quiz
-quizAttemptSchema.index({ quiz: 1, student: 1 }, { unique: true });
-
-module.exports = mongoose.model('QuizAttempt', quizAttemptSchema);
+    return QuizAttempt;
+};

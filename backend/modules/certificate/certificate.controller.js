@@ -1,14 +1,13 @@
-﻿const Certificate = require('./certificate.model');
-const QuizAttempt = require('../test/quizAttempt.model');
-const Test = require('../test/test.model');
-const Course = require('../course/course.model');
+const { Certificate, QuizAttempt, Test, Course, User } = require('../../models');
 
 // Student: get my certificates
 const getMyCertificates = async (req, res, next) => {
     try {
-        const certificates = await Certificate.find({ user: req.user.id })
-            .populate('course', 'title category instructor level')
-            .sort({ earnedDate: -1 });
+        const certificates = await Certificate.findAll({
+            where: { student: req.user.id }, // changed 'user' to 'student' to match index.js association
+            include: [{ model: Course, attributes: ['title', 'category', 'instructor', 'level'] }],
+            order: [['earnedDate', 'DESC']]
+        });
         res.status(200).json({ success: true, count: certificates.length, certificates });
     } catch (error) {
         next(error);
@@ -18,10 +17,13 @@ const getMyCertificates = async (req, res, next) => {
 // Admin: get all certificates
 const getCertificates = async (req, res, next) => {
     try {
-        const certificates = await Certificate.find({})
-            .populate('user', 'name email')
-            .populate('course', 'title category')
-            .sort({ createdAt: -1 });
+        const certificates = await Certificate.findAll({
+            include: [
+                { model: User, attributes: ['name', 'email'] },
+                { model: Course, attributes: ['title', 'category'] }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
         res.status(200).json({ success: true, count: certificates.length, certificates });
     } catch (error) {
         next(error);
@@ -30,9 +32,12 @@ const getCertificates = async (req, res, next) => {
 
 const getCertificateById = async (req, res, next) => {
     try {
-        const certificate = await Certificate.findById(req.params.id)
-            .populate('user', 'name email college branch')
-            .populate('course', 'title category instructor level');
+        const certificate = await Certificate.findByPk(req.params.id, {
+            include: [
+                { model: User, attributes: ['name', 'email', 'college', 'branch'] },
+                { model: Course, attributes: ['title', 'category', 'instructor', 'level'] }
+            ]
+        });
         if (!certificate) {
             return res.status(404).json({ success: false, message: 'Certificate not found' });
         }
@@ -45,9 +50,13 @@ const getCertificateById = async (req, res, next) => {
 // Verify a certificate by its public certificateId
 const verifyCertificate = async (req, res, next) => {
     try {
-        const certificate = await Certificate.findOne({ certificateId: req.params.certId })
-            .populate('user', 'name email college')
-            .populate('course', 'title category instructor');
+        const certificate = await Certificate.findOne({
+            where: { certificateId: req.params.certId },
+            include: [
+                { model: User, attributes: ['name', 'email', 'college'] },
+                { model: Course, attributes: ['title', 'category', 'instructor'] }
+            ]
+        });
         if (!certificate) {
             return res.status(404).json({ success: false, message: 'Certificate not found or invalid' });
         }
@@ -70,10 +79,12 @@ const getGrade = (percent) => {
 // Auto-issue certificate after quiz completion (called from test controller)
 const autoIssueCertificate = async (userId, quizId) => {
     try {
-        const attempt = await QuizAttempt.findOne({ quiz: quizId, student: userId });
+        const attempt = await QuizAttempt.findOne({ where: { quiz: quizId, student: userId } });
         if (!attempt || !attempt.completedAt) return null;
 
-        const test = await Test.findById(quizId).populate('course', 'title');
+        const test = await Test.findByPk(quizId, {
+            include: [{ model: Course, attributes: ['title'] }]
+        });
         if (!test || !test.course) return null;
 
         const scorePercent = attempt.totalMarks > 0
@@ -85,16 +96,18 @@ const autoIssueCertificate = async (userId, quizId) => {
 
         // Check if certificate already exists
         const existing = await Certificate.findOne({
-            user: userId,
-            course: test.course._id,
-            type: 'quiz_pass',
+            where: {
+                student: userId,
+                course: test.course,
+                type: 'quiz_pass',
+            }
         });
         if (existing) return existing;
 
         const cert = await Certificate.create({
-            user: userId,
-            course: test.course._id,
-            title: `${test.course.title} — Quiz Completion`,
+            student: userId,
+            course: test.course,
+            title: `${test.Course ? test.Course.title : 'Course'} — Quiz Completion`,
             type: 'quiz_pass',
             grade: getGrade(scorePercent),
             scorePercent,
@@ -114,11 +127,11 @@ const createCertificate = async (req, res, next) => {
         const certificate = await Certificate.create(req.body);
         res.status(201).json({ success: true, message: 'Certificate created', certificate });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map((e) => e.message);
+        if (error.name === 'SequelizeValidationError' || error.name === 'ValidationError') {
+            const messages = error.errors.map((e) => e.message);
             return res.status(400).json({ success: false, message: messages.join(', ') });
         }
-        if (error.code === 11000) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(409).json({ success: false, message: 'Certificate already exists for this user/course/type' });
         }
         next(error);
@@ -127,10 +140,11 @@ const createCertificate = async (req, res, next) => {
 
 const deleteCertificate = async (req, res, next) => {
     try {
-        const certificate = await Certificate.findByIdAndDelete(req.params.id);
+        const certificate = await Certificate.findByPk(req.params.id);
         if (!certificate) {
             return res.status(404).json({ success: false, message: 'Certificate not found' });
         }
+        await certificate.destroy();
         res.status(200).json({ success: true, message: 'Certificate deleted' });
     } catch (error) {
         next(error);

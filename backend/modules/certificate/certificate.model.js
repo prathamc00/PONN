@@ -1,60 +1,60 @@
-const mongoose = require('mongoose');
-
-const certificateSchema = new mongoose.Schema(
-    {
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: [true, 'User is required'],
-        },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Course',
-            required: [true, 'Course is required'],
+module.exports = (sequelize, DataTypes) => {
+    const Certificate = sequelize.define('Certificate', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
         },
         title: {
-            type: String,
-            required: [true, 'Certificate title is required'],
-            trim: true,
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: 'Certificate title is required' }
+            }
         },
         type: {
-            type: String,
-            enum: ['course_completion', 'quiz_pass'],
-            default: 'course_completion',
+            type: DataTypes.ENUM('course_completion', 'quiz_pass'),
+            defaultValue: 'course_completion'
         },
         grade: {
-            type: String,
-            trim: true,
+            type: DataTypes.STRING,
+            allowNull: true
         },
         scorePercent: {
-            type: Number,
-            min: 0,
-            max: 100,
+            type: DataTypes.FLOAT,
+            validate: {
+                min: 0,
+                max: 100
+            }
         },
         earnedDate: {
-            type: Date,
-            default: Date.now,
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW
         },
         certificateId: {
-            type: String,
-            unique: true,
-        },
-    },
-    { timestamps: true }
-);
+            type: DataTypes.STRING,
+            unique: true
+        }
+        // user and course handled by associations
+    }, {
+        timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['student', 'course', 'type'] // Note: using 'student' because of association naming in index
+            }
+        ],
+        hooks: {
+            beforeValidate: (certificate) => {
+                if (!certificate.certificateId) {
+                    const prefix = 'CRSM';
+                    const timestamp = Date.now().toString(36).toUpperCase();
+                    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+                    certificate.certificateId = `${prefix}-${timestamp}-${random}`;
+                }
+            }
+        }
+    });
 
-// One certificate per user per course per type
-certificateSchema.index({ user: 1, course: 1, type: 1 }, { unique: true });
-
-// Auto-generate a unique certificate ID
-certificateSchema.pre('save', function (next) {
-    if (!this.certificateId) {
-        const prefix = 'CRSM';
-        const timestamp = Date.now().toString(36).toUpperCase();
-        const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-        this.certificateId = `${prefix}-${timestamp}-${random}`;
-    }
-    next();
-});
-
-module.exports = mongoose.model('Certificate', certificateSchema);
+    return Certificate;
+};
