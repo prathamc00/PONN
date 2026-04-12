@@ -63,7 +63,7 @@ export default function GradingQueue() {
     if (isNaN(grade)) return alert('Please enter a valid grade');
     setSubmitting(true);
     try {
-      await apiFetch(`/assignments/submissions/${submissionId}/grade`, {
+      await apiFetch(`/submissions/${submissionId}/grade`, {
         method: 'PUT',
         body: JSON.stringify({ grade, feedback: feedbackInput }),
       });

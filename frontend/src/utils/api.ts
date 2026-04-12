@@ -40,11 +40,19 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  // Prevent caching for API requests
+  const fetchOptions = {
+    cache: 'no-store' as RequestCache,
+    ...options,
+    headers
+  };
+
+  const res = await fetch(`${API_BASE}${path}`, fetchOptions);
 
   if (res.status === 401 && !path.includes('/login') && !path.includes('/register') && !path.includes('/forgot-password')) {
     clearAuth();
-    window.location.href = '/login';
+    const base = (import.meta as any).env.BASE_URL?.replace(/\/$/, '') || '';
+    window.location.href = `${base}/login`;
     throw new Error('Session expired. Please login again.');
   }
 

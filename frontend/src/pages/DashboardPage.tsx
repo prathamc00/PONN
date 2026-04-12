@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   BookOpen, FileText, ClipboardCheck, Calendar, ArrowUpRight, Clock, Award, ChevronRight, Sparkles, TrendingUp, Zap, Target, Activity, Bell, ShieldCheck
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '../components/Loading';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../utils/api';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ totalCourses: 0, pendingAssignments: 0, testsCompleted: 0 });
@@ -30,7 +32,7 @@ export default function DashboardPage() {
         const attempts = attemptsData.attempts || [];
 
         const topCourses = enrolledCourses.slice(0, 3);
-        const progressPromises = topCourses.map(c => 
+        const progressPromises = topCourses.map(c =>
           apiFetch(`/courses/${c._id}/progress`).catch(() => ({ completedModules: [] }))
         );
         const progressResults = await Promise.all(progressPromises);
@@ -63,7 +65,7 @@ export default function DashboardPage() {
             const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
             tasks.push({ title: a.title, due: diffDays <= 1 ? 'Tomorrow' : `${diffDays} days left`, type: 'Assignment', color: 'bg-amber-400' });
           });
-        } catch {}
+        } catch { }
 
         setPendingTasks(tasks);
       } catch (err) { console.error(err); }
@@ -114,9 +116,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-4">
-          <a href="/courses" className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-lg glow-shadow active:scale-95 group">
+          <Link to="/courses" className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-lg glow-shadow active:scale-95 group">
             <Zap className="w-5 h-5 group-hover:fill-white transition-all" /> Continue Learning
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -161,12 +163,12 @@ export default function DashboardPage() {
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Your learning journey awaits</h3>
                   <p className="text-slate-400 mb-8 max-w-sm mx-auto font-medium leading-relaxed">Explore our catalog and enroll in your first course to start earning achievements.</p>
-                  <a href="/courses" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-lg glow-shadow active:scale-95 group">
+                  <Link to="/courses" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-lg glow-shadow active:scale-95 group">
                     Explore Catalog <ArrowUpRight className="w-5 h-5 group-hover:translate-y-[-2px] group-hover:translate-x-[2px] transition-transform" />
-                  </a>
+                  </Link>
                 </motion.div>
               ) : courses.map((course, i) => (
-                <div key={course._id} className="space-y-5 cursor-pointer group hover:bg-white/5 p-4 -m-4 rounded-3xl transition-all" onClick={() => window.location.href = `/courses/${course._id}`}>
+                <div key={course._id} className="space-y-5 cursor-pointer group hover:bg-white/5 p-4 -m-4 rounded-3xl transition-all" onClick={() => navigate(`/courses/${course._id}`)}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Activity className="w-5 h-5 text-slate-500 group-hover:text-brand-blue transition-colors" />
@@ -182,7 +184,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
-              <a href="/courses" className="text-center font-bold text-sm text-brand-blue hover:text-brand-purple transition-all pt-4 border-t border-white/5 uppercase tracking-[0.2em] block">View All Courses</a>
+              <Link to="/courses" className="text-center font-bold text-sm text-brand-blue hover:text-brand-purple transition-all pt-4 border-t border-white/5 uppercase tracking-[0.2em] block">View All Courses</Link>
             </div>
           </motion.div>
         </div>
@@ -227,9 +229,9 @@ export default function DashboardPage() {
                 </motion.div>
               ))}
             </div>
-            <a href="/assignments" className="w-full mt-12 py-5 bg-white/5 text-slate-400 rounded-2xl font-bold text-xs hover:bg-white/10 hover:text-white transition-all border border-white/5 uppercase tracking-[0.3em] block text-center">
+            <Link to="/assignments" className="w-full mt-12 py-5 bg-white/5 text-slate-400 rounded-2xl font-bold text-xs hover:bg-white/10 hover:text-white transition-all border border-white/5 uppercase tracking-[0.3em] block text-center">
               View All Tasks
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>

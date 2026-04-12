@@ -18,6 +18,7 @@ export default function TestPage() {
   const [tests, setTests] = useState<TestRecord[]>([]);
   const [attempts, setAttempts] = useState<any[]>([]);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<string>>(new Set());
+  const [courseProgress, setCourseProgress] = useState<Record<string, { completed: number; total: number }>>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -31,8 +32,25 @@ export default function TestPage() {
         ]);
         setTests(tData.tests || []);
         setAttempts(aData.attempts || []);
-        const ids = new Set<string>((eData.courses || []).map((c: any) => c._id));
+        const enrolledCourses: any[] = eData.courses || [];
+        const ids = new Set<string>(enrolledCourses.map((c: any) => String(c.id || c._id)));
         setEnrolledCourseIds(ids);
+
+        // Fetch progress for each enrolled course
+        const progressMap: Record<string, { completed: number; total: number }> = {};
+        await Promise.all(
+          enrolledCourses.map(async (c: any) => {
+            const courseId = String(c.id || c._id);
+            const totalModules = (c.modules || []).length;
+            try {
+              const prog = await apiFetch(`/courses/${courseId}/progress`);
+              progressMap[courseId] = { completed: (prog.completedModules || []).length, total: totalModules };
+            } catch {
+              progressMap[courseId] = { completed: 0, total: totalModules };
+            }
+          })
+        );
+        setCourseProgress(progressMap);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };
@@ -95,9 +113,12 @@ export default function TestPage() {
             const stats = getAttemptStats(test._id);
             const canRetake = stats !== null && stats.percentage < 45;
 
-            // Check if user is enrolled in the course this quiz belongs to
-            const testCourseId = typeof test.course === 'object' && test.course ? test.course._id : test.course;
-            const isLocked = testCourseId && !enrolledCourseIds.has(testCourseId);
+            // Check enrollment and course completion
+            const testCourseId = typeof test.course === 'object' && test.course ? String((test.course as any)._id || (test.course as any).id) : String(test.course);
+            const isNotEnrolled = testCourseId && !enrolledCourseIds.has(testCourseId);
+            const progress = courseProgress[testCourseId];
+            const courseNotComplete = progress && progress.total > 0 && progress.completed < progress.total;
+            const isLocked = isNotEnrolled || courseNotComplete;
             
             return (
               <motion.div key={test._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
@@ -142,9 +163,19 @@ export default function TestPage() {
                     </span>
                   </div>
 
-                  {isLocked ? (
+                  {isNotEnrolled ? (
                     <div className="w-full py-4 bg-white/5 text-slate-500 text-center rounded-2xl text-sm font-bold border border-white/5 flex items-center justify-center gap-2">
                       <Lock className="w-5 h-5" /> Enroll in course to access
+                    </div>
+                  ) : courseNotComplete && progress ? (
+                    <div className="w-full py-4 bg-amber-400/10 border border-amber-400/20 text-amber-400 text-center rounded-2xl text-sm font-bold flex flex-col items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4" /> Complete all lessons first
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                        <div className="h-full bg-amber-400 rounded-full transition-all" style={{ width: `${Math.round((progress.completed / progress.total) * 100)}%` }} />
+                      </div>
+                      <span className="text-[10px] font-bold text-amber-500/70">{progress.completed}/{progress.total} lessons watched</span>
                     </div>
                   ) : status === 'Available' ? (
                     <button onClick={() => handleStartQuiz(test._id)}

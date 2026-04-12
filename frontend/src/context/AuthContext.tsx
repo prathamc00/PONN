@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { apiFetch, setToken, clearAuth, getStoredUser, setStoredUser, getToken } from '../utils/api';
 
 interface User {
-  _id: string;
+  id: string;
+  _id?: string;
   name: string;
   email: string;
   role: 'student' | 'instructor' | 'admin';
@@ -97,7 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAuth();
     setUser(null);
     setTokenState(null);
-    window.location.href = '/login';
+    const base = (import.meta as any).env.BASE_URL?.replace(/\/$/, '') || '';
+    window.location.href = `${base}/login`;
   }, []);
 
   return (

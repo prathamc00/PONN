@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import { Link } from 'react-router-dom';
+import {
   Users, BookOpen, TrendingUp, ArrowUpRight, Activity, Calendar, ChevronRight, Award
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -12,32 +13,57 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     const fetchStats = async () => {
       try {
-        const [usersData, coursesData] = await Promise.all([
-          apiFetch('/users'),
-          apiFetch('/courses/manage'),
-        ]);
-        const users = usersData.users || [];
-        const courses = coursesData.courses || [];
-        setStats({
-          totalUsers: users.length,
-          totalCourses: courses.length,
-          totalAssignments: 0,
-          pendingInstructors: users.filter((u: any) => u.role === 'instructor' && u.approvalStatus === 'pending').length,
-        });
+        if (user.role === 'admin') {
+          // Admin: can fetch all users + all managed courses
+          const [usersData, coursesData] = await Promise.all([
+            apiFetch('/users'),
+            apiFetch('/courses/manage'),
+          ]);
+          const users = usersData.users || [];
+          const courses = coursesData.courses || [];
+          setStats({
+            totalUsers: users.length,
+            totalCourses: courses.length,
+            totalAssignments: 0,
+            pendingInstructors: users.filter((u: any) => u.role === 'instructor' && u.approvalStatus === 'pending').length,
+          });
+        } else {
+          // Instructor: only their own courses & assignments
+          const [coursesData, assignmentsData] = await Promise.all([
+            apiFetch('/courses/manage'),
+            apiFetch('/assignments/manage').catch(() => ({ assignments: [] })),
+          ]);
+          const courses = coursesData.courses || [];
+          const assignments = assignmentsData.assignments || [];
+          setStats({
+            totalUsers: 0,
+            totalCourses: courses.length,
+            totalAssignments: assignments.length,
+            pendingInstructors: 0,
+          });
+        }
       } catch (err) { console.error('Failed to load dashboard stats', err); }
       finally { setLoading(false); }
     };
     fetchStats();
-  }, []);
+  }, [user]);
 
-  const statCards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' },
-    { label: 'Active Courses', value: stats.totalCourses, icon: BookOpen, color: 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400' },
-    { label: 'Pending Instructors', value: stats.pendingInstructors, icon: Activity, color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' },
-    { label: 'Completion Rate', value: '—', icon: TrendingUp, color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' },
-  ];
+  const statCards = user?.role === 'admin'
+    ? [
+        { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' },
+        { label: 'Active Courses', value: stats.totalCourses, icon: BookOpen, color: 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400' },
+        { label: 'Pending Instructors', value: stats.pendingInstructors, icon: Activity, color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' },
+        { label: 'Completion Rate', value: '—', icon: TrendingUp, color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' },
+      ]
+    : [
+        { label: 'My Courses', value: stats.totalCourses, icon: BookOpen, color: 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400' },
+        { label: 'My Assignments', value: stats.totalAssignments, icon: Activity, color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' },
+        { label: 'Completion Rate', value: '—', icon: TrendingUp, color: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' },
+        { label: 'Students Enrolled', value: '—', icon: Users, color: 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' },
+      ];
 
   return (
     <div className="space-y-8">
@@ -86,13 +112,13 @@ export default function AdminDashboard() {
               { label: 'Quiz Scheduler', desc: 'Create and schedule quizzes for students', href: '/admin/quiz', adminOnly: false },
               { label: 'Quiz Results', desc: 'View student attempts and export results', href: '/admin/quiz-results', adminOnly: true },
             ].filter(action => user?.role === 'admin' || !action.adminOnly).map((action) => (
-              <a key={action.href} href={action.href} className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-all group">
+              <Link key={action.href} to={action.href} className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-all group">
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{action.label}</h4>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{action.desc}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-300 group-hover:translate-x-1 group-hover:text-brand-500 transition-all" />
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -107,7 +133,7 @@ export default function AdminDashboard() {
                 <span className="text-sm font-bold text-brand-600">{stats.totalUsers}</span>
               </div>
               <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-brand-500 rounded-full" style={{ width: '100%' }} />
+                <div className="h-full bg-brand-500 rounded-full" style={{ width: stats.totalUsers > 0 ? '100%' : '0%' }} />
               </div>
             </div>
             <div>
@@ -116,7 +142,7 @@ export default function AdminDashboard() {
                 <span className="text-sm font-bold text-violet-600">{stats.totalCourses}</span>
               </div>
               <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-violet-500 rounded-full" style={{ width: '100%' }} />
+                <div className="h-full bg-violet-500 rounded-full" style={{ width: stats.totalCourses > 0 ? '100%' : '0%' }} />
               </div>
             </div>
           </div>
@@ -130,9 +156,9 @@ export default function AdminDashboard() {
               <p className="text-sm font-medium text-brand-700 dark:text-brand-300 leading-relaxed">
                 You have {stats.pendingInstructors} pending instructor application{stats.pendingInstructors > 1 ? 's' : ''}. Review them to expand your teaching team.
               </p>
-              <a href="/admin/users" className="mt-4 w-full block text-center py-2.5 bg-brand-600 text-white rounded-xl font-bold text-sm hover:bg-brand-700 transition-all">
+              <Link to="/admin/users" className="mt-4 w-full block text-center py-2.5 bg-brand-600 text-white rounded-xl font-bold text-sm hover:bg-brand-700 transition-all">
                 Review Now
-              </a>
+              </Link>
             </div>
           )}
         </div>

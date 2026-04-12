@@ -6,6 +6,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
 interface Module {
   _id: string;
@@ -98,7 +99,8 @@ export default function ManageCourses() {
       }
       setIsAddModalOpen(false);
       await loadCourses();
-    } catch (err: any) { alert(err.message); }
+      toast.success(editingCourseId ? 'Course updated successfully' : 'Course created successfully');
+    } catch (err: any) { toast.error(err.message || 'Failed to save course'); }
   };
 
   const deleteCourse = async (id: string) => {
@@ -106,7 +108,8 @@ export default function ManageCourses() {
     try {
       await apiFetch(`/courses/${id}`, { method: 'DELETE' });
       await loadCourses();
-    } catch (err: any) { alert(err.message); }
+      toast.success('Course deleted securely');
+    } catch (err: any) { toast.error(err.message || 'Failed to delete course'); }
   };
 
   // Lesson CRUD
@@ -163,15 +166,16 @@ export default function ManageCourses() {
         if (xhr.status >= 200 && xhr.status < 300) {
           setIsLessonModalOpen(false);
           loadModules(selectedCourse._id);
+          toast.success(editingModuleId ? 'Lesson updated' : 'Lesson uploaded successfully');
           resolve();
         } else {
           let msg = 'Failed to save lesson';
           try { msg = JSON.parse(xhr.responseText).message || msg; } catch {}
-          alert(msg);
+          toast.error(msg);
           reject(new Error(msg));
         }
       };
-      xhr.onerror = () => { setIsUploading(false); alert('Network error during upload'); reject(new Error('Network error')); };
+      xhr.onerror = () => { setIsUploading(false); toast.error('Network error during upload'); reject(new Error('Network error')); };
       xhr.send(formData);
     });
   };
@@ -181,7 +185,8 @@ export default function ManageCourses() {
     try {
       await apiFetch(`/courses/${selectedCourse._id}/modules/${moduleId}`, { method: 'DELETE' });
       await loadModules(selectedCourse._id);
-    } catch (err: any) { alert(err.message); }
+      toast.success('Lesson deleted securely');
+    } catch (err: any) { toast.error(err.message || 'Failed to delete lesson'); }
   };
 
   const filteredCourses = courses.filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));

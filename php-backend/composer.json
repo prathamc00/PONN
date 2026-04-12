@@ -1,0 +1,16 @@
+{
+    "name": "crismatech/student-portal-api",
+    "description": "Student Learning Portal PHP Backend",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "firebase/php-jwt": "^6.10",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "autoload": {
+        "psr-4": {}
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

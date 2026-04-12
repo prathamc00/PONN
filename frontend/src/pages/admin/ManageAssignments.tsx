@@ -84,7 +84,7 @@ export default function ManageAssignments() {
   const submitGrade = async () => {
     if (!selectedSubmission) return;
     try {
-      await apiFetch(`/assignments/submissions/${selectedSubmission._id}/grade`, {
+      await apiFetch(`/submissions/${selectedSubmission._id}/grade`, {
         method: 'PUT',
         body: JSON.stringify({ grade: Number(grade), feedback }),
       });

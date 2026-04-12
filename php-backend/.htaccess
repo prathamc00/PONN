@@ -1,0 +1,27 @@
+Options -Indexes
+Options +FollowSymLinks
+
+RewriteEngine On
+
+# Allow direct access to actual files and directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route everything through index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Prevent access to .env files
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Prevent access to composer files
+<Files "composer.json">
+    Order allow,deny
+    Deny from all
+</Files>
+<Files "composer.lock">
+    Order allow,deny
+    Deny from all
+</Files>

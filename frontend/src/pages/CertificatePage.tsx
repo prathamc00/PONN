@@ -68,7 +68,6 @@ export default function CertificatePage() {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#6C63FF';
     ctx.font = 'bold 14px Arial';
-    ctx.letterSpacing = '8px';
     ctx.fillText('CERTIFICATE OF ACHIEVEMENT', w / 2, 140);
 
     // Trophy icon (text emoji)
@@ -187,8 +186,8 @@ export default function CertificatePage() {
         </motion.div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-10">
-          {certificates.map((cert, i) => (
-            <AnimatedTiltCard key={cert._id}>
+          {certificates.map((cert: any, i) => (
+            <AnimatedTiltCard key={cert._id || cert.id || i}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

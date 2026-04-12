@@ -1,8 +1,10 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
+  RewriteBase /portal/
   RewriteRule ^index\.html$ - [L]
+  RewriteRule ^api/(.*)$ php-backend/index.php [QSA,L]
+
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteRule . /portal/index.html [L]
 </IfModule>

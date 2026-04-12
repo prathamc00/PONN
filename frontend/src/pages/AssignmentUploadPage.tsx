@@ -1,13 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Upload, FileText, X, CheckCircle2, AlertCircle, Sparkles, ArrowLeft, CloudUpload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiFetch } from '../utils/api';
+import toast from 'react-hot-toast';
+
+interface Assignment {
+  _id: string;
+  title: string;
+  course: { title: string } | string;
+}
 
 export default function AssignmentUploadPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [selectedId, setSelectedId] = useState<string>(location.state?.assignmentId || '');
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const data = await apiFetch('/assignments');
+        setAssignments(data.assignments || []);
+        if (data.assignments?.length > 0 && !selectedId) {
+          setSelectedId(data.assignments[0]._id);
+        }
+      } catch (err: any) {
+        toast.error('Failed to load assignments');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
+  }, [selectedId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -15,14 +45,28 @@ export default function AssignmentUploadPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedId || !file) return;
+
     setIsUploading(true);
-    // Mock upload delay
-    setTimeout(() => {
-      setIsUploading(false);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await apiFetch(`/assignments/${selectedId}/submit`, {
+        method: 'POST',
+        body: formData
+      });
+
+      toast.success('Assignment submitted successfully!');
       navigate('/assignments');
-    }, 2000);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit assignment');
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -61,10 +105,23 @@ export default function AssignmentUploadPage() {
           <div className="space-y-3">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-1">Select Assignment</label>
             <div className="relative group">
-              <select className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none appearance-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white/10 transition-all cursor-pointer">
-                <option className="bg-slate-900">IoT Sensor Interfacing</option>
-                <option className="bg-slate-900">Database Normalization</option>
-                <option className="bg-slate-900">Cloud Architecture Design</option>
+              <select 
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                disabled={loading || assignments.length === 0}
+                className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-white font-bold outline-none appearance-none focus:ring-2 focus:ring-brand-purple/50 focus:bg-white/10 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {loading ? (
+                  <option>Loading assignments...</option>
+                ) : assignments.length === 0 ? (
+                  <option>No assignments available</option>
+                ) : (
+                  assignments.map((a) => (
+                    <option key={a._id} value={a._id} className="bg-slate-900">
+                      {a.title} ({typeof a.course === 'object' ? a.course.title : 'No Course'})
+                    </option>
+                  ))
+                )}
               </select>
               <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover:text-brand-purple transition-colors">
                 <FileText className="w-5 h-5" />
@@ -150,7 +207,7 @@ export default function AssignmentUploadPage() {
             </button>
             <button 
               type="submit"
-              disabled={!file || isUploading}
+              disabled={!file || !selectedId || isUploading}
               className="flex-[2] py-5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-2xl font-bold hover:scale-[1.02] transition-all shadow-lg glow-shadow disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
             >
               {isUploading ? (

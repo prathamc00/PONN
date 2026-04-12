@@ -138,8 +138,11 @@ export default function AssignmentsPage() {
                     </td>
                     <td className="px-10 py-8 text-right">
                       {status === 'Pending' && (
-                        <Link to="/assignments/upload"
-                          className="px-6 py-2.5 bg-white/5 text-white text-xs font-bold rounded-2xl hover:bg-brand-purple transition-all border border-white/10 inline-flex items-center gap-2">
+                        <Link 
+                          to="/assignments/upload"
+                          state={{ assignmentId: item._id }}
+                          className="px-6 py-2.5 bg-white/5 text-white text-xs font-bold rounded-2xl hover:bg-brand-purple transition-all border border-white/10 inline-flex items-center gap-2"
+                        >
                           Upload <ChevronRight className="w-3.5 h-3.5" />
                         </Link>
                       )}

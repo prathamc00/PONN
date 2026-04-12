@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import { Link } from 'react-router-dom';
+import {
   Users, Search, Filter, Download, CheckCircle, XCircle, Trash2, Mail, ChevronLeft, ChevronRight, ShieldCheck, FileText, Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { apiFetch, downloadBlob } from '../../utils/api';
 
 interface UserRecord {
@@ -42,8 +44,8 @@ export default function ManageUsers() {
 
   useEffect(() => { loadUsers(); }, []);
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter(u =>
+    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -53,38 +55,43 @@ export default function ManageUsers() {
 
   const handleApprove = async (id: string) => {
     try {
-      await apiFetch(`/users/${id}/approval-status`, { method: 'PATCH', body: JSON.stringify({ approvalStatus: 'approved' }) });
+      await apiFetch(`/users/${id}/approval`, { method: 'PUT', body: JSON.stringify({ approvalStatus: 'approved' }) });
       await loadUsers();
-    } catch (err: any) { alert(err.message); }
+      toast.success('Instructor approved');
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const handleReject = async (id: string) => {
     try {
-      await apiFetch(`/users/${id}/approval-status`, { method: 'PATCH', body: JSON.stringify({ approvalStatus: 'rejected' }) });
+      await apiFetch(`/users/${id}/approval`, { method: 'PUT', body: JSON.stringify({ approvalStatus: 'rejected' }) });
       await loadUsers();
-    } catch (err: any) { alert(err.message); }
+      toast.success('Instructor rejected');
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const handleVerifyAadhaar = async (id: string) => {
     try {
-      await apiFetch(`/users/${id}/aadhaar-status`, { method: 'PATCH', body: JSON.stringify({ aadhaarVerified: true }) });
+      await apiFetch(`/users/${id}/aadhaar-verify`, { method: 'PUT', body: JSON.stringify({ aadhaarVerified: 1 }) });
       await loadUsers();
-    } catch (err: any) { alert(err.message); }
+      toast.success('Aadhaar verified');
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this user?')) return;
+    if (!window.confirm('Delete this user?')) return;
     try {
       await apiFetch(`/users/${id}`, { method: 'DELETE' });
       await loadUsers();
-    } catch (err: any) { alert(err.message); }
+      toast.success('User deleted successfully');
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const handleExport = async () => {
     try {
-      const blob = await apiFetch('/users/export');
+      const blob = await apiFetch('/users/export/csv');
       downloadBlob(blob, 'students_data.csv');
-    } catch (err: any) { alert('Export failed: ' + err.message); }
+      toast.success('Export started');
+    } catch (err: any) { toast.error('Export failed: ' + err.message); }
   };
 
   const handleAddInstructor = async (e: React.FormEvent) => {
@@ -95,9 +102,9 @@ export default function ManageUsers() {
       setShowAddModal(false);
       setNewInstructor({ name: '', email: '', password: '', phone: '' });
       await loadUsers();
-      alert('Instructor added successfully!');
+      toast.success('Instructor added successfully!');
     } catch (err: any) {
-      alert(err.message || 'Failed to add instructor');
+      toast.error(err.message || 'Failed to add instructor');
     } finally {
       setAdding(false);
     }
@@ -203,39 +210,36 @@ export default function ManageUsers() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-900 dark:text-white">
-                            <a href={`/admin/users/${user._id}`} className="hover:text-brand-500 transition-colors underline decoration-transparent hover:decoration-brand-500 underline-offset-4">{user.name}</a>
+                          <Link to={`/admin/users/${user._id}`} className="hover:text-brand-500 transition-colors underline decoration-transparent hover:decoration-brand-500 underline-offset-4">{user.name}</Link>
                           </p>
                           <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{user.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        user.role === 'instructor' ? 'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400' 
-                        : user.role === 'admin' ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400'
-                        : 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${user.role === 'instructor' ? 'bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400'
+                          : user.role === 'admin' ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400'
+                            : 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
+                        }`}>
                         {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`flex items-center gap-1.5 text-xs font-bold ${
-                        status === 'Active' ? 'text-emerald-600' : status === 'Pending' ? 'text-amber-600' : 'text-rose-500'
-                      }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${
-                          status === 'Active' ? 'bg-emerald-600' : status === 'Pending' ? 'bg-amber-600' : 'bg-rose-500'
-                        }`} />
+                      <span className={`flex items-center gap-1.5 text-xs font-bold ${status === 'Active' ? 'text-emerald-600' : status === 'Pending' ? 'text-amber-600' : 'text-rose-500'
+                        }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${status === 'Active' ? 'bg-emerald-600' : status === 'Pending' ? 'bg-amber-600' : 'bg-rose-500'
+                          }`} />
                         {status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       {user.aadhaarCardPath ? (
                         <div className="flex items-center gap-2">
-                          <a 
-                            href={`${(import.meta as any).env.VITE_BACKEND_URL || ''}/${user.aadhaarCardPath}`} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="p-2 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 dark:bg-brand-900/20 dark:text-brand-400 dark:hover:bg-brand-900/40 transition-colors" 
+                          <a
+                            href={`${(import.meta as any).env.VITE_BACKEND_URL || ''}/${user.aadhaarCardPath}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-brand-50 text-brand-600 rounded-xl hover:bg-brand-100 dark:bg-brand-900/20 dark:text-brand-400 dark:hover:bg-brand-900/40 transition-colors"
                             title="View Document"
                           >
                             <FileText className="w-4 h-4" />
@@ -295,19 +299,19 @@ export default function ManageUsers() {
             <form onSubmit={handleAddInstructor} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">Name</label>
-                <input required type="text" value={newInstructor.name} onChange={(e) => setNewInstructor({...newInstructor, name: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="John Doe" />
+                <input required type="text" value={newInstructor.name} onChange={(e) => setNewInstructor({ ...newInstructor, name: e.target.value })} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="John Doe" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
-                <input required type="email" value={newInstructor.email} onChange={(e) => setNewInstructor({...newInstructor, email: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="john@example.com" />
+                <input required type="email" value={newInstructor.email} onChange={(e) => setNewInstructor({ ...newInstructor, email: e.target.value })} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="john@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
-                <input required type="password" value={newInstructor.password} onChange={(e) => setNewInstructor({...newInstructor, password: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="••••••••" />
+                <input required type="password" value={newInstructor.password} onChange={(e) => setNewInstructor({ ...newInstructor, password: e.target.value })} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="••••••••" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">Phone (Optional)</label>
-                <input type="text" value={newInstructor.phone} onChange={(e) => setNewInstructor({...newInstructor, phone: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="+1234567890" />
+                <input type="text" value={newInstructor.phone} onChange={(e) => setNewInstructor({ ...newInstructor, phone: e.target.value })} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="+1234567890" />
               </div>
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">Cancel</button>

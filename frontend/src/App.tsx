@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import DashboardLayout from './components/DashboardLayout';
 import HomePage from './pages/HomePage';
@@ -88,7 +89,8 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
+          <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#fff', borderRadius: '1rem', border: '1px solid #334155' } }} />
           <AnimatedRoutes />
         </Router>
       </ThemeProvider>

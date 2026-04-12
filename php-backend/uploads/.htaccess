@@ -1,0 +1,11 @@
+# Disable script execution
+php_flag engine off
+
+# Disable CGI scripts
+Options -ExecCGI
+
+# Force download of risky file types even if they somehow bypass other checks
+<FilesMatch "\.(php|php3|php4|php5|php7|php8|pht|phtml|phar|exe|sh|cgi|pl|py)$">
+    ForceType application/octet-stream
+    Header set Content-Disposition attachment
+</FilesMatch>
