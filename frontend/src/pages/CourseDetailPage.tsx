@@ -1,14 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, PlayCircle, FileText, Download, Sparkles, Clock, User, BarChart, Lock, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronLeft, PlayCircle, FileText, Download, Sparkles, Clock, User, BarChart, Lock, CheckCircle2, Loader2, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { apiFetch } from '../utils/api';
 import PremiumVideoPlayer from '../components/PremiumVideoPlayer';
 
+// Resolve a relative upload path to a full URL
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+const resolveUrl = (path: string) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${API_BASE}/${path.replace(/^\//, '')}`;
+};
+
 /* ...rest of imports and interface... */
 interface ModuleItem {
-  _id: string;
+  id: string;      // PHP backend uses 'id', not '_id'
+  _id?: string;    // keep for compat just in case
   title: string;
   description?: string;
   videoUrl?: string;
@@ -52,7 +61,7 @@ export default function CourseDetailPage() {
           if (firstPlayable) {
             setActiveVideo(firstPlayable.videoUrl!);
             setActiveTitle(firstPlayable.title);
-            setActiveModuleId(firstPlayable._id);
+            setActiveModuleId(firstPlayable.id || firstPlayable._id || '');
           }
         }
       } catch (err) { console.error(err); }
@@ -77,7 +86,7 @@ export default function CourseDetailPage() {
       if (firstVideo) {
         setActiveVideo(firstVideo.videoUrl!);
         setActiveTitle(firstVideo.title);
-        setActiveModuleId(firstVideo._id);
+        setActiveModuleId(firstVideo.id || firstVideo._id || '');
       }
     } catch (err: any) {
       alert(err.message || 'Enrollment failed');
@@ -89,7 +98,7 @@ export default function CourseDetailPage() {
   const isModuleUnlocked = (mod: ModuleItem, index: number): boolean => {
     if (index === 0) return true; // First module is always unlocked
     const prevModule = modules[index - 1];
-    return completedModules.includes(String(prevModule._id));
+    return completedModules.includes(String(prevModule.id || prevModule._id || ''));
   };
 
   const fireConfetti = () => {
@@ -117,12 +126,14 @@ export default function CourseDetailPage() {
     frame();
   };
 
+  const getModId = (m: ModuleItem) => m.id || m._id || '';
+
   const handlePlayVideo = (mod: ModuleItem, index: number) => {
     if (!isModuleUnlocked(mod, index)) return;
     if (mod.videoUrl) {
       setActiveVideo(mod.videoUrl);
       setActiveTitle(mod.title);
-      setActiveModuleId(mod._id);
+      setActiveModuleId(getModId(mod));
     }
   };
 
@@ -148,7 +159,7 @@ export default function CourseDetailPage() {
 
   const handleDownloadNotes = (mod: ModuleItem) => {
     if (mod.notesUrl) {
-      window.open(mod.notesUrl.startsWith('/') ? mod.notesUrl : `/${mod.notesUrl}`, '_blank');
+      window.open(resolveUrl(mod.notesUrl), '_blank');
     }
   };
 
@@ -180,7 +191,7 @@ export default function CourseDetailPage() {
           >
             {isEnrolled && activeVideo ? (
               <PremiumVideoPlayer 
-                src={activeVideo.startsWith('http') ? activeVideo : activeVideo.startsWith('/') ? activeVideo : `/${activeVideo}`}
+                src={resolveUrl(activeVideo)}
                 onEnded={handleVideoEnded}
                 poster={`https://picsum.photos/seed/${id}/1920/1080`}
               />
@@ -224,6 +235,43 @@ export default function CourseDetailPage() {
               </div>
             )}
           </motion.div>
+
+          {/* ── Lesson Notes Panel ── */}
+          {isEnrolled && activeModuleId && (() => {
+            const activeMod = modules.find(m => getModId(m) === activeModuleId);
+            return activeMod?.notesUrl ? (
+              <motion.div
+                key={activeModuleId}
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                className="glass-panel rounded-[2rem] border-white/5 overflow-hidden"
+              >
+                <div className="flex items-center justify-between p-6 gap-4 flex-wrap">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-brand-blue/10 rounded-2xl flex items-center justify-center shrink-0">
+                      <BookOpen className="w-6 h-6 text-brand-blue" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Lesson Notes</p>
+                      <p className="text-sm font-bold text-white">{activeMod.title}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">PDF study material for this lesson</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDownloadNotes(activeMod)}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-brand-blue to-brand-purple text-white rounded-2xl font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-brand-blue/20 active:scale-95"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Notes (PDF)
+                  </button>
+                </div>
+              </motion.div>
+            ) : isEnrolled && (
+              <div className="flex items-center gap-3 px-6 py-4 glass-panel rounded-[2rem] border-white/5">
+                <FileText className="w-5 h-5 text-slate-600 shrink-0" />
+                <p className="text-sm text-slate-500 font-medium">No notes available for this lesson.</p>
+              </div>
+            );
+          })()}
 
           {/* Course Info */}
           <div className="glass-panel p-10 rounded-[3rem] border-white/5">
@@ -312,12 +360,12 @@ export default function CourseDetailPage() {
                 <p className="text-slate-500 text-center py-10 text-sm">No lessons added yet.</p>
               ) : modules.map((mod, i) => {
                 const unlocked = isModuleUnlocked(mod, i);
-                const isComplete = completedModules.includes(String(mod._id));
+                const isComplete = completedModules.includes(String(getModId(mod)));
                 const isActive = activeTitle === mod.title;
 
                 return (
                   <button
-                    key={mod._id}
+                    key={getModId(mod)}
                     onClick={() => handlePlayVideo(mod, i)}
                     disabled={!unlocked}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl text-left transition-all border group ${
