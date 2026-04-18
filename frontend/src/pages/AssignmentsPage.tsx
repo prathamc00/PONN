@@ -7,6 +7,7 @@ import { apiFetch } from '../utils/api';
 interface AssignmentView {
   _id: string;
   title: string;
+  description?: string;
   course: { _id: string; title: string } | string;
   dueDate: string;
   maxMarks: number;
@@ -112,6 +113,9 @@ export default function AssignmentsPage() {
                         </div>
                         <div>
                           <span className="font-bold text-lg text-white group-hover:text-brand-purple transition-colors tracking-tight">{item.title}</span>
+                          {item.description && (
+                            <p className="text-xs text-slate-400 mt-1 max-w-[520px] whitespace-pre-wrap">{item.description}</p>
+                          )}
                           <p className="text-xs text-slate-500 mt-1">Max: {item.maxMarks} marks</p>
                         </div>
                       </div>

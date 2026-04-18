@@ -4,6 +4,7 @@ import { BookOpen, FileText, ClipboardCheck, Award, Mail, MapPin, Github, Twitte
 import { motion } from 'framer-motion';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useAuth } from '../context/AuthContext';
+import BrandLogo from '../components/BrandLogo';
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -19,10 +20,9 @@ export default function HomePage() {
       {/* Header */}
       <header className="fixed top-0 w-full z-50 px-4 sm:px-6 lg:px-8 pt-6">
         <nav className="max-w-7xl mx-auto h-16 glass-panel rounded-2xl flex items-center justify-between px-6">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-br from-brand-purple to-brand-blue rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg glow-shadow transition-transform group-hover:scale-110">C</div>
-            <span className="font-bold text-2xl tracking-tight gradient-text">Crismatech</span>
-          </div>
+          <Link to="/" className="flex items-center gap-3 group cursor-pointer">
+            <BrandLogo className="h-10 w-auto max-w-[170px] object-contain transition-transform group-hover:scale-105" />
+          </Link>
           
           <div className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">Home</Link>
@@ -157,8 +157,7 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-4 gap-16 mb-16">
             <div className="col-span-2">
               <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-gradient-to-br from-brand-purple to-brand-blue rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg glow-shadow">C</div>
-                <span className="font-bold text-2xl tracking-tight gradient-text">Crismatech</span>
+                <BrandLogo className="h-12 w-auto max-w-[190px] object-contain" />
               </div>
               <p className="text-slate-400 max-w-md mb-10 font-medium text-lg leading-relaxed">
                 Leading the way in digital education and technical training. Join thousands of students learning new skills every day.

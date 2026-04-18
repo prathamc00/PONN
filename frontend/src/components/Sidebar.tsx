@@ -6,6 +6,7 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../utils';
 import { useAuth } from '../context/AuthContext';
+import BrandLogo from './BrandLogo';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -48,11 +49,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       )}>
         <div className="flex flex-col h-full">
           <div className="p-8">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-brand-purple to-brand-blue rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg glow-shadow transition-transform group-hover:scale-110">C</div>
+            <Link to="/" className="flex flex-col gap-2 group">
+              <BrandLogo className="h-12 w-auto max-w-[170px] object-contain self-start transition-transform group-hover:scale-105" />
               <div className="flex flex-col">
-                <span className="font-bold text-xl leading-none tracking-tight gradient-text">Crismatech</span>
-                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500 mt-2">Learning Portal</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand-purple mt-1">Learning Portal</span>
               </div>
             </Link>
           </div>

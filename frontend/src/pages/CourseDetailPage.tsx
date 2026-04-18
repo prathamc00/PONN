@@ -7,11 +7,14 @@ import { apiFetch } from '../utils/api';
 import PremiumVideoPlayer from '../components/PremiumVideoPlayer';
 
 // Resolve a relative upload path to a full URL
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const API_BASE = API_URL.replace(/\/api$/, '');
 const resolveUrl = (path: string) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  return `${API_BASE}/${path.replace(/^\//, '')}`;
+  const cleanPath = path.replace(/^\//, '');
+  if (API_BASE) return `${API_BASE}/${cleanPath}`;
+  return `${window.location.origin}/${cleanPath}`;
 };
 
 /* ...rest of imports and interface... */
@@ -25,6 +28,17 @@ interface ModuleItem {
   duration?: string;
   order: number;
 }
+
+const normalizeModule = (m: any, index: number): ModuleItem => ({
+  id: String(m?.id ?? m?._id ?? m?.moduleId ?? ''),
+  _id: m?._id ? String(m._id) : undefined,
+  title: m?.title || `Lesson ${index + 1}`,
+  description: m?.description || '',
+  videoUrl: m?.videoUrl || m?.videoURL || m?.video || '',
+  notesUrl: m?.notesUrl || m?.notesURL || m?.notesPath || m?.notes || '',
+  duration: m?.duration || '',
+  order: typeof m?.order === 'number' ? m.order : index,
+});
 
 export default function CourseDetailPage() {
   const { id } = useParams();
@@ -52,7 +66,7 @@ export default function CourseDetailPage() {
             apiFetch(`/courses/${id}/modules`),
             apiFetch(`/courses/${id}/progress`),
           ]);
-          const mods = modulesData.modules || [];
+          const mods = (modulesData.modules || []).map((m: any, index: number) => normalizeModule(m, index));
           setModules(mods);
           setCompletedModules((progressData.completedModules || []).map(String));
 
@@ -61,7 +75,7 @@ export default function CourseDetailPage() {
           if (firstPlayable) {
             setActiveVideo(firstPlayable.videoUrl!);
             setActiveTitle(firstPlayable.title);
-            setActiveModuleId(firstPlayable.id || firstPlayable._id || '');
+            setActiveModuleId(String(firstPlayable.id || firstPlayable._id || ''));
           }
         }
       } catch (err) { console.error(err); }
@@ -79,14 +93,14 @@ export default function CourseDetailPage() {
         apiFetch(`/courses/${id}/modules`),
         apiFetch(`/courses/${id}/progress`),
       ]);
-      const mods = modulesData.modules || [];
+      const mods = (modulesData.modules || []).map((m: any, index: number) => normalizeModule(m, index));
       setModules(mods);
       setCompletedModules((progressData.completedModules || []).map(String));
       const firstVideo = mods.find((m: ModuleItem) => m.videoUrl);
       if (firstVideo) {
         setActiveVideo(firstVideo.videoUrl!);
         setActiveTitle(firstVideo.title);
-        setActiveModuleId(firstVideo.id || firstVideo._id || '');
+        setActiveModuleId(String(firstVideo.id || firstVideo._id || ''));
       }
     } catch (err: any) {
       alert(err.message || 'Enrollment failed');
@@ -126,14 +140,14 @@ export default function CourseDetailPage() {
     frame();
   };
 
-  const getModId = (m: ModuleItem) => m.id || m._id || '';
+  const getModId = (m: ModuleItem) => String(m.id || m._id || '');
 
   const handlePlayVideo = (mod: ModuleItem, index: number) => {
     if (!isModuleUnlocked(mod, index)) return;
     if (mod.videoUrl) {
       setActiveVideo(mod.videoUrl);
       setActiveTitle(mod.title);
-      setActiveModuleId(getModId(mod));
+      setActiveModuleId(String(getModId(mod)));
     }
   };
 
@@ -158,8 +172,9 @@ export default function CourseDetailPage() {
   };
 
   const handleDownloadNotes = (mod: ModuleItem) => {
-    if (mod.notesUrl) {
-      window.open(resolveUrl(mod.notesUrl), '_blank');
+    const notesPath = mod.notesUrl || '';
+    if (notesPath) {
+      window.open(resolveUrl(notesPath), '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -238,7 +253,7 @@ export default function CourseDetailPage() {
 
           {/* ── Lesson Notes Panel ── */}
           {isEnrolled && activeModuleId && (() => {
-            const activeMod = modules.find(m => getModId(m) === activeModuleId);
+            const activeMod = modules.find(m => String(getModId(m)) === String(activeModuleId));
             return activeMod?.notesUrl ? (
               <motion.div
                 key={activeModuleId}

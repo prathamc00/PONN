@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 interface Module {
+  id?: string;
   _id: string;
   title: string;
   description?: string;
@@ -52,6 +53,9 @@ export default function ManageCourses() {
   const [notesFile, setNotesFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+
+  const getModuleId = (m: Module) => String(m._id || m.id || '');
 
   const loadCourses = async () => {
     try {
@@ -67,7 +71,12 @@ export default function ManageCourses() {
   const loadModules = async (courseId: string) => {
     try {
       const data = await apiFetch(`/courses/${courseId}/modules`);
-      setModules(data.modules || []);
+      const normalized = (data.modules || []).map((m: any) => ({
+        ...m,
+        _id: String(m._id || m.id || ''),
+        id: String(m.id || m._id || ''),
+      }));
+      setModules(normalized);
     } catch (err) { console.error(err); }
   };
 
@@ -123,7 +132,7 @@ export default function ManageCourses() {
   };
 
   const openEditLesson = (m: Module) => {
-    setEditingModuleId(m._id);
+    setEditingModuleId(getModuleId(m));
     setLessonForm({ title: m.title, description: m.description || '', duration: m.duration || '', order: String(m.order + 1) });
     setVideoFile(null);
     setNotesFile(null);
@@ -144,8 +153,8 @@ export default function ManageCourses() {
     if (notesFile) formData.append('notes', notesFile);
 
     const url = editingModuleId
-      ? `/api/courses/${selectedCourse._id}/modules/${editingModuleId}`
-      : `/api/courses/${selectedCourse._id}/modules`;
+      ? `${API_BASE}/courses/${selectedCourse._id}/modules/${editingModuleId}`
+      : `${API_BASE}/courses/${selectedCourse._id}/modules`;
     const method = editingModuleId ? 'PUT' : 'POST';
     const token = localStorage.getItem('token');
 
@@ -294,7 +303,7 @@ export default function ManageCourses() {
                 {modules.length === 0 ? (
                   <div className="text-center py-16 text-slate-400 font-medium">No lessons yet. Click "Add New Lesson" to get started.</div>
                 ) : modules.map((lesson, index) => (
-                  <div key={lesson._id}
+                  <div key={getModuleId(lesson)}
                     className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800 group hover:border-brand-500/50 transition-all"
                   >
                     <div className="flex items-center gap-6">
@@ -325,7 +334,7 @@ export default function ManageCourses() {
                       <button onClick={() => openEditLesson(lesson)} className="p-2.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => deleteLesson(lesson._id)} className="p-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all">
+                      <button onClick={() => deleteLesson(getModuleId(lesson))} className="p-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

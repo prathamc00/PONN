@@ -383,10 +383,17 @@ function getMyAttempts(): void {
 function getAllAttempts(): void {
     $db   = getDb();
     $stmt = $db->query('
-        SELECT qa.*, t.title AS testTitle, u.name AS studentName
+        SELECT qa.*, 
+               t.title AS testTitle, 
+               t.totalQuestions,
+               t.course AS courseId,
+               u.name AS studentName,
+               u.email AS studentEmail,
+               c.title AS courseTitle
         FROM quiz_attempts qa
         LEFT JOIN tests t ON t.id = qa.quiz
         LEFT JOIN users u ON u.id = qa.student
+        LEFT JOIN courses c ON c.id = t.course
         ORDER BY qa.completedAt DESC
     ');
     $attempts = $stmt->fetchAll();
@@ -395,6 +402,20 @@ function getAllAttempts(): void {
         $a['answers'] = json_decode($a['answers'] ?? '[]', true) ?? [];
         $percentage = $a['totalMarks'] > 0 ? ($a['score'] / $a['totalMarks']) * 100 : 0;
         $a['passed'] = $percentage >= 40;
+        $a['student'] = [
+            '_id'   => (string) ($a['student'] ?? ''),
+            'name'  => $a['studentName'] ?? '',
+            'email' => $a['studentEmail'] ?? '',
+        ];
+        $a['quiz'] = [
+            '_id'            => (string) ($a['quiz'] ?? ''),
+            'title'          => $a['testTitle'] ?? '',
+            'totalQuestions' => (int) ($a['totalQuestions'] ?? 0),
+            'course'         => [
+                '_id'   => (string) ($a['courseId'] ?? ''),
+                'title' => $a['courseTitle'] ?? '',
+            ],
+        ];
     }
     unset($a);
     jsonResponse(['success' => true, 'count' => count($attempts), 'attempts' => $attempts]);

@@ -4,6 +4,26 @@
  * Full PHP port of modules/attendance/attendance.controller.js
  */
 
+function normalizeAttendanceRows(array $rows): array {
+    foreach ($rows as &$r) {
+        $r['_id'] = (string) ($r['id'] ?? '');
+        $r['student'] = [
+            '_id'   => (string) ($r['student'] ?? ''),
+            'name'  => $r['studentName'] ?? '',
+            'email' => $r['studentEmail'] ?? '',
+        ];
+        $r['course'] = !empty($r['course'])
+            ? [
+                '_id'   => (string) $r['course'],
+                'title' => $r['courseTitle'] ?? '',
+            ]
+            : null;
+    }
+    unset($r);
+
+    return $rows;
+}
+
 // ── trackActivity ─────────────────────────────────────────────────────────────
 function trackActivity(): void {
     $user = getAuthUser();
@@ -31,14 +51,15 @@ function getMyAttendance(): void {
     $db   = getDb();
 
     $stmt = $db->prepare('
-        SELECT a.*, c.title AS courseTitle
+        SELECT a.*, u.name AS studentName, u.email AS studentEmail, c.title AS courseTitle
         FROM attendances a
+        LEFT JOIN users u ON u.id = a.student
         LEFT JOIN courses c ON c.id = a.course
         WHERE a.student = ?
         ORDER BY a.createdAt DESC
     ');
     $stmt->execute([$user['id']]);
-    $records = $stmt->fetchAll();
+    $records = normalizeAttendanceRows($stmt->fetchAll());
     jsonResponse(['success' => true, 'count' => count($records), 'records' => $records]);
 }
 
@@ -54,7 +75,7 @@ function getCourseAttendance(int $courseId): void {
         ORDER BY a.createdAt DESC
     ');
     $stmt->execute([$courseId]);
-    $records = $stmt->fetchAll();
+    $records = normalizeAttendanceRows($stmt->fetchAll());
     jsonResponse(['success' => true, 'count' => count($records), 'records' => $records]);
 }
 
@@ -68,6 +89,6 @@ function getAllAttendance(): void {
         LEFT JOIN courses c ON c.id = a.course
         ORDER BY a.createdAt DESC
     ');
-    $records = $stmt->fetchAll();
+    $records = normalizeAttendanceRows($stmt->fetchAll());
     jsonResponse(['success' => true, 'count' => count($records), 'records' => $records]);
 }

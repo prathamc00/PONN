@@ -8,6 +8,10 @@ import toast from 'react-hot-toast';
 interface Assignment {
   _id: string;
   title: string;
+  description?: string;
+  type: 'file_upload' | 'case_study' | 'code';
+  dueDate?: string;
+  maxMarks?: number;
   course: { title: string } | string;
 }
 
@@ -17,6 +21,8 @@ export default function AssignmentUploadPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [selectedId, setSelectedId] = useState<string>(location.state?.assignmentId || '');
   const [file, setFile] = useState<File | null>(null);
+  const [textContent, setTextContent] = useState('');
+  const [codeContent, setCodeContent] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -37,7 +43,9 @@ export default function AssignmentUploadPage() {
       }
     };
     fetchAssignments();
-  }, [selectedId]);
+  }, []);
+
+  const selectedAssignment = assignments.find((a) => a._id === selectedId);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -47,17 +55,31 @@ export default function AssignmentUploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedId || !file) return;
+    if (!selectedId || !selectedAssignment) return;
+    if (selectedAssignment.type === 'file_upload' && !file) return;
+    if (selectedAssignment.type === 'case_study' && !textContent.trim()) return;
+    if (selectedAssignment.type === 'code' && !codeContent.trim()) return;
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      await apiFetch(`/assignments/${selectedId}/submit`, {
-        method: 'POST',
-        body: formData
-      });
+      if (selectedAssignment.type === 'file_upload') {
+        const formData = new FormData();
+        formData.append('file', file as File);
+        await apiFetch(`/assignments/${selectedId}/submit`, {
+          method: 'POST',
+          body: formData
+        });
+      } else if (selectedAssignment.type === 'case_study') {
+        await apiFetch(`/assignments/${selectedId}/submit`, {
+          method: 'POST',
+          body: JSON.stringify({ textContent })
+        });
+      } else {
+        await apiFetch(`/assignments/${selectedId}/submit`, {
+          method: 'POST',
+          body: JSON.stringify({ codeContent })
+        });
+      }
 
       toast.success('Assignment submitted successfully!');
       navigate('/assignments');
@@ -129,48 +151,99 @@ export default function AssignmentUploadPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-1">Upload Source File</label>
-            <div 
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={(e) => { e.preventDefault(); setIsDragging(false); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }}
-              className={`relative border-2 border-dashed rounded-[2.5rem] p-16 text-center transition-all duration-500 group ${
-                isDragging 
-                  ? 'border-brand-purple bg-brand-purple/10 scale-[0.98]' 
-                  : 'border-white/10 hover:border-brand-purple/50 hover:bg-white/5'
-              }`}
-            >
-              <input 
-                type="file" 
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-              />
-              <div className="flex flex-col items-center">
-                <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-6 transition-all duration-500 ${
-                  isDragging ? 'bg-brand-purple text-white rotate-12' : 'bg-white/5 text-slate-500 group-hover:text-brand-purple group-hover:scale-110'
-                }`}>
-                  <CloudUpload className="w-10 h-10" />
-                </div>
-                <p className="text-xl font-bold text-white tracking-tight mb-2">
-                  {file ? file.name : 'Drop your file here'}
-                </p>
-                <p className="text-sm text-slate-500 font-medium">
-                  {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'or click to browse from your device'}
-                </p>
-                <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                  <span>PDF</span>
-                  <div className="w-1 h-1 bg-slate-700 rounded-full" />
-                  <span>DOCX</span>
-                  <div className="w-1 h-1 bg-slate-700 rounded-full" />
-                  <span>ZIP</span>
+          {selectedAssignment && (
+            <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-3">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Assignment Question</p>
+              <h3 className="text-lg font-bold text-white tracking-tight">{selectedAssignment.title}</h3>
+              <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                {selectedAssignment.description?.trim() || 'No question text provided by instructor.'}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-bold bg-brand-purple/15 text-brand-purple border border-brand-purple/30">
+                  {selectedAssignment.type.replace('_', ' ')}
+                </span>
+                {selectedAssignment.maxMarks != null && (
+                  <span className="text-xs text-slate-400 font-medium">Max marks: {selectedAssignment.maxMarks}</span>
+                )}
+                {selectedAssignment.dueDate && (
+                  <span className="text-xs text-slate-400 font-medium">
+                    Due: {new Date(selectedAssignment.dueDate).toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {selectedAssignment?.type === 'file_upload' && (
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-1">Upload Source File</label>
+              <div 
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => { e.preventDefault(); setIsDragging(false); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }}
+                className={`relative border-2 border-dashed rounded-[2.5rem] p-16 text-center transition-all duration-500 group ${
+                  isDragging 
+                    ? 'border-brand-purple bg-brand-purple/10 scale-[0.98]' 
+                    : 'border-white/10 hover:border-brand-purple/50 hover:bg-white/5'
+                }`}
+              >
+                <input 
+                  type="file" 
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className="flex flex-col items-center">
+                  <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-6 transition-all duration-500 ${
+                    isDragging ? 'bg-brand-purple text-white rotate-12' : 'bg-white/5 text-slate-500 group-hover:text-brand-purple group-hover:scale-110'
+                  }`}>
+                    <CloudUpload className="w-10 h-10" />
+                  </div>
+                  <p className="text-xl font-bold text-white tracking-tight mb-2">
+                    {file ? file.name : 'Drop your file here'}
+                  </p>
+                  <p className="text-sm text-slate-500 font-medium">
+                    {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'or click to browse from your device'}
+                  </p>
+                  <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                    <span>PDF</span>
+                    <div className="w-1 h-1 bg-slate-700 rounded-full" />
+                    <span>DOCX</span>
+                    <div className="w-1 h-1 bg-slate-700 rounded-full" />
+                    <span>ZIP</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {selectedAssignment?.type === 'case_study' && (
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-1">Your Answer</label>
+              <textarea
+                rows={10}
+                value={textContent}
+                onChange={(e) => setTextContent(e.target.value)}
+                placeholder="Write your case study answer here..."
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-brand-purple/40 text-white font-medium resize-none"
+              />
+            </div>
+          )}
+
+          {selectedAssignment?.type === 'code' && (
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-1">Your Code</label>
+              <textarea
+                rows={12}
+                value={codeContent}
+                onChange={(e) => setCodeContent(e.target.value)}
+                placeholder="Paste your code solution here..."
+                className="w-full px-5 py-4 bg-[#0b1020] border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-brand-blue/40 text-slate-100 font-mono text-sm resize-none"
+              />
+            </div>
+          )}
 
           <AnimatePresence>
-            {file && (
+            {selectedAssignment?.type === 'file_upload' && file && (
               <motion.div 
                 initial={{ opacity: 0, height: 0, y: 10 }}
                 animate={{ opacity: 1, height: 'auto', y: 0 }}
@@ -207,7 +280,14 @@ export default function AssignmentUploadPage() {
             </button>
             <button 
               type="submit"
-              disabled={!file || !selectedId || isUploading}
+              disabled={
+                !selectedId ||
+                isUploading ||
+                !selectedAssignment ||
+                (selectedAssignment.type === 'file_upload' && !file) ||
+                (selectedAssignment.type === 'case_study' && !textContent.trim()) ||
+                (selectedAssignment.type === 'code' && !codeContent.trim())
+              }
               className="flex-[2] py-5 bg-gradient-to-r from-brand-purple to-brand-blue text-white rounded-2xl font-bold hover:scale-[1.02] transition-all shadow-lg glow-shadow disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
             >
               {isUploading ? (
