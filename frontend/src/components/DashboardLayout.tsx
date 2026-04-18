@@ -25,7 +25,7 @@ export default function DashboardLayout() {
 
   return (
     <SocketProvider>
-    <div className="min-h-screen bg-[#030014] text-slate-100 selection:bg-brand-purple/30 selection:text-brand-purple transition-colors student-theme">
+    <div className="min-h-screen overflow-x-hidden bg-[#030014] text-slate-100 selection:bg-brand-purple/30 selection:text-brand-purple transition-colors student-theme">
       <CursorGlow />
       {/* Background Glows (Animated) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">

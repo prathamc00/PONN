@@ -36,11 +36,21 @@ export default function StudentProfileViewer() {
 
       if (foundUser) {
         // Enrolled courses details
-        const enrolledIds = foundUser.enrolledCourses || [];
-        setCourses(courseRes.courses?.filter((c: any) => enrolledIds.includes(c._id)) || []);
+        const rawEnrollments = foundUser.enrolledCourses || foundUser.enrolledCourseIds || [];
+        const enrolledIds = Array.isArray(rawEnrollments)
+          ? rawEnrollments.map((e: any) => String(e?._id ?? e?.id ?? e))
+          : [];
+        setCourses(
+          courseRes.courses?.filter((c: any) => enrolledIds.includes(String(c._id ?? c.id))) || []
+        );
 
         // Certificates
-        setCertificates(certRes.certificates?.filter((c: any) => c.user?._id === id) || []);
+        setCertificates(
+          certRes.certificates?.filter((c: any) => {
+            const certStudentId = String(c?.user?._id ?? c?.user?.id ?? c?.student ?? '');
+            return certStudentId === String(id);
+          }) || []
+        );
 
         // Quiz bounds
         setQuizAttempts(quizRes.attempts?.filter((q: any) => q.student?._id === id) || []);
@@ -50,15 +60,22 @@ export default function StudentProfileViewer() {
 
         // For assignments, we need to fetch submissions for all assignments and filter
         const allAssignments = asgRes.assignments || [];
-        const subPromises = allAssignments.map((a: any) => apiFetch(`/assignments/${a._id}/submissions`));
-        const subResults = await Promise.allSettled(subPromises);
+        const assignmentFetchList = allAssignments
+          .map((a: any) => ({ assignment: a, assignmentId: String(a?._id ?? a?.id ?? '') }))
+          .filter((item: any) => item.assignmentId);
+        const subResults = await Promise.allSettled(
+          assignmentFetchList.map((item: any) => apiFetch(`/assignments/${item.assignmentId}/submissions`))
+        );
         
         const mySubs: any[] = [];
         subResults.forEach((r, i) => {
           if (r.status === 'fulfilled') {
             const subs = r.value.submissions || [];
-            const mySub = subs.find((s: any) => s.student?._id === id);
-            if (mySub) mySubs.push({ ...mySub, assignment: allAssignments[i] });
+            const mySub = subs.find((s: any) => {
+              const submissionStudentId = String(s?.student?._id ?? s?.student?.id ?? s?.student ?? '');
+              return submissionStudentId === String(id);
+            });
+            if (mySub) mySubs.push({ ...mySub, assignment: assignmentFetchList[i].assignment });
           }
         });
         setAssignments(mySubs);
@@ -154,7 +171,7 @@ export default function StudentProfileViewer() {
           </div>
           <div className="space-y-3">
             {certificates.length === 0 ? <p className="text-slate-400 text-sm">No certificates earned.</p> : certificates.map(c => (
-              <div key={c._id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20">
+              <div key={String(c._id ?? c.id ?? c.certificateId)} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/20">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{c.title}</h3>
                   <p className="text-xs text-slate-500 mt-1 font-mono">{c.certificateId}</p>
@@ -186,7 +203,7 @@ export default function StudentProfileViewer() {
                 <div className="text-right shrink-0">
                   {a.grade !== undefined && a.grade !== null ? (
                     <span className="inline-flex flex-col items-end">
-                      <span className="text-sm font-bold text-emerald-500">{a.grade} / {a.assignment?.maxGrade || 100}</span>
+                      <span className="text-sm font-bold text-emerald-500">{a.grade} / {a.assignment?.maxMarks ?? a.assignment?.maxGrade ?? 100}</span>
                       <span className="text-[10px] text-slate-400 cursor-help" title={a.feedback}>Graded</span>
                     </span>
                   ) : (

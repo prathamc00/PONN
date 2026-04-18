@@ -4,6 +4,7 @@ import { Mail, Lock, ArrowRight, Sparkles, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoadingSpinner, LoadingOverlay } from '../components/Loading';
 import { useAuth } from '../context/AuthContext';
+import BrandLogo from '../components/BrandLogo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 relative overflow-hidden student-theme">
+    <div className="min-h-screen overflow-x-hidden bg-[#050505] flex items-center justify-center p-6 relative overflow-hidden student-theme">
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-purple/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-blue/20 rounded-full blur-[120px] animate-pulse delay-700" />
       
@@ -42,7 +43,10 @@ export default function LoginPage() {
         <div className="text-center mb-12">
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
             <Link to="/" className="inline-flex items-center gap-3 mb-8 group">
-              <img src={`${import.meta.env.BASE_URL}cta_logo.png`} alt="Logo" className="h-20 w-auto object-contain transition-transform duration-500 group-hover:rotate-3" />
+              <BrandLogo
+                alt="Crismatech Logo"
+                className="h-20 w-auto max-w-[280px] object-contain transition-transform duration-500 group-hover:rotate-3"
+              />
             </Link>
           </motion.div>
           <div className="flex items-center justify-center gap-2 mb-3">

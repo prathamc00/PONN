@@ -12,11 +12,38 @@ function getUsers(): void {
     $db     = getDb();
 
     $count = $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
-    $stmt  = $db->prepare('SELECT id, name, email, college, branch, semester, phone, role, approvalStatus, aadhaarVerified, aadhaarCardPath, createdAt FROM users ORDER BY createdAt DESC LIMIT ? OFFSET ?');
+    $stmt  = $db->prepare('
+        SELECT 
+            u.id,
+            u.name,
+            u.email,
+            u.college,
+            u.branch,
+            u.semester,
+            u.phone,
+            u.role,
+            u.approvalStatus,
+            u.aadhaarVerified,
+            u.aadhaarCardPath,
+            u.createdAt,
+            (
+                SELECT GROUP_CONCAT(uc.courseId)
+                FROM user_courses uc
+                WHERE uc.userId = u.id
+            ) AS enrolledCourseIds
+        FROM users u
+        ORDER BY u.createdAt DESC
+        LIMIT ? OFFSET ?
+    ');
     $stmt->execute([$limit, $offset]);
     $users = $stmt->fetchAll();
     foreach ($users as &$u) {
         $u['_id'] = (string) $u['id'];
+        $csv = trim((string)($u['enrolledCourseIds'] ?? ''));
+        $u['enrolledCourses'] = $csv !== ''
+            ? array_map('strval', array_filter(explode(',', $csv), fn($id) => $id !== ''))
+            : [];
+        unset($u['enrolledCourseIds']);
     }
     unset($u);
 

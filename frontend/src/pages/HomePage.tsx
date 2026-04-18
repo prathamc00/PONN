@@ -10,7 +10,7 @@ export default function HomePage() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[#030014] text-slate-100 selection:bg-brand-purple/30 selection:text-brand-purple student-theme">
+    <div className="min-h-screen overflow-x-hidden bg-[#030014] text-slate-100 selection:bg-brand-purple/30 selection:text-brand-purple student-theme">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-purple/20 rounded-full blur-[120px] animate-pulse" />
@@ -21,7 +21,7 @@ export default function HomePage() {
       <header className="fixed top-0 w-full z-50 px-4 sm:px-6 lg:px-8 pt-6">
         <nav className="max-w-7xl mx-auto h-16 glass-panel rounded-2xl flex items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-3 group cursor-pointer">
-            <BrandLogo className="h-10 w-auto max-w-[170px] object-contain transition-transform group-hover:scale-105" />
+            <BrandLogo className="h-12 w-auto max-w-[220px] object-contain transition-transform group-hover:scale-105" />
           </Link>
           
           <div className="hidden md:flex items-center gap-8">
@@ -98,7 +98,7 @@ export default function HomePage() {
             <motion.div 
               animate={{ y: [0, -20, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-8 -right-8 z-20 glass-panel p-6 rounded-3xl glow-shadow-blue border-brand-blue/20"
+              className="absolute -top-8 right-0 z-20 hidden xl:block glass-panel p-6 rounded-3xl glow-shadow-blue border-brand-blue/20"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-brand-blue/20 rounded-2xl flex items-center justify-center text-brand-blue">
@@ -163,9 +163,19 @@ export default function HomePage() {
                 Leading the way in digital education and technical training. Join thousands of students learning new skills every day.
               </p>
               <div className="flex gap-6">
-                {[Twitter, Linkedin, Github].map((Icon, i) => (
-                  <a key={i} href="#" className="w-12 h-12 glass-card rounded-full flex items-center justify-center hover:bg-brand-purple hover:text-white transition-all">
-                    <Icon className="w-5 h-5" />
+                {[
+                  { icon: Twitter, href: '#' },
+                  { icon: Linkedin, href: 'https://www.linkedin.com/company/crismatech-automation/' },
+                  { icon: Github, href: '#' }
+                ].map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.href}
+                    target={item.href.startsWith('http') ? '_blank' : undefined}
+                    rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="w-12 h-12 glass-card rounded-full flex items-center justify-center hover:bg-brand-purple hover:text-white transition-all"
+                  >
+                    <item.icon className="w-5 h-5" />
                   </a>
                 ))}
               </div>
@@ -178,13 +188,13 @@ export default function HomePage() {
                   <div className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-brand-purple group-hover:scale-110 transition-transform">
                     <Mail className="w-5 h-5" />
                   </div>
-                  info@crismatech.com
+                  director@crismatech.com
                 </li>
                 <li className="flex items-center gap-4 group cursor-pointer">
                   <div className="w-10 h-10 glass-card rounded-xl flex items-center justify-center text-brand-blue group-hover:scale-110 transition-transform">
                     <MapPin className="w-5 h-5" />
                   </div>
-                  123 Education Hub, Tech City
+                  KGF & Bengaluru city
                 </li>
               </ul>
             </div>

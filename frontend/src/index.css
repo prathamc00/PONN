@@ -30,12 +30,12 @@
 
 @layer base {
   html {
-    @apply transition-colors duration-300 antialiased;
+    @apply transition-colors duration-300 antialiased overflow-x-hidden;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
   body {
-    @apply bg-[#030014] text-slate-100 transition-colors duration-300;
+    @apply bg-[#030014] text-slate-100 transition-colors duration-300 overflow-x-hidden;
   }
 }
 
