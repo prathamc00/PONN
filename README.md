@@ -134,7 +134,12 @@ DB_USER=your_db_user
 DB_PASS=your_db_password
 DB_NAME=your_db_name
 JWT_SECRET=your_64_char_random_secret
-JWT_EXPIRES_IN=7d
+JWT_EXPIRES_IN=8h
+APP_ENV=production
+ENFORCE_HTTPS=true
+EMAIL_VERIFICATION_SECRET=another_64_char_random_secret
+SECURITY_EVENTS_ENABLED=true
+SECURITY_LOG_FILE_FALLBACK=true
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your_email@gmail.com
@@ -167,12 +172,20 @@ Import the SQL schema into your MySQL database. The backend will auto-create the
 ### Backend
 1. Update `php-backend/.env` with production values:
    ```env
+    APP_ENV=production
+    ENFORCE_HTTPS=true
+    JWT_SECRET=<64+ random chars>
+    EMAIL_VERIFICATION_SECRET=<64+ random chars>
+    SECURITY_EVENTS_ENABLED=true
+    SECURITY_LOG_FILE_FALLBACK=true
    FRONTEND_URL=https://your-domain.com
    RESET_PASSWORD_URL=https://your-domain.com/portal/reset-password
    ```
 2. Upload the entire `php-backend/` folder to your hosting root
 3. Make sure `uploads/` directories are writable: `chmod 755 uploads/`
 4. Run `composer install --no-dev` on the server
+5. Ensure database user is restricted to app host/private network only (never `0.0.0.0/0`)
+6. Verify TLS certificate and force HTTPS for all traffic
 
 ### Apache Requirements
 The project requires `mod_rewrite` to be enabled (Hostinger enables this by default). The `.htaccess` files handle:
@@ -183,12 +196,26 @@ The project requires `mod_rewrite` to be enabled (Hostinger enables this by defa
 
 ## 🔐 Security Notes
 
-- JWT tokens expire in **7 days**
+- JWT tokens expire in **8 hours** by default
 - OTP codes expire in **5 minutes**, max 20 requests per IP per 5 min
 - Passwords are hashed with **bcrypt** (cost factor 12)
+- If available, password hashing uses **Argon2id**
 - File uploads are **whitelisted** by extension (pdf, doc, mp4, etc.)
 - CORS is restricted to the configured `FRONTEND_URL`
 - Sensitive files (`.env`, `composer.json`) are blocked via `.htaccess`
+- Registration requires a signed short-lived email verification token
+- Password reset links are one-time-use and expire in 15 minutes
+- Login attempts are rate-limited per email key and IP
+- Security monitoring logs auth denials, API errors, and suspicious traffic in `security_events`
+
+## 📈 Monitoring
+
+- Audit events are stored in `security_events` (and optionally `php-backend/logs/security.log` as fallback)
+- Each API response includes an `X-Request-Id` header for correlation
+- Track at minimum:
+    - `auth_login_failed`, `auth_login_blocked`, `auth_login_success`
+    - `rate_limit_exceeded`, `api_rate_limited`
+    - `api_error`, `api_unhandled_exception`, `api_fatal_error`
 
 ---
 

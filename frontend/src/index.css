@@ -113,3 +113,78 @@
 .animate-spin-slow {
   animation: spin-slow 4s linear infinite;
 }
+
+/* SweetAlert2 dark purple theme */
+.ponn-swal-popup {
+  width: min(92vw, 30rem);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  background: radial-gradient(circle at top, rgba(124, 58, 237, 0.24) 0%, rgba(3, 0, 20, 0.96) 52%);
+  color: #e2e8f0;
+  box-shadow: 0 24px 64px rgba(1, 0, 14, 0.65), 0 0 0 1px rgba(124, 58, 237, 0.15);
+  padding: 1.4rem;
+}
+
+.ponn-swal-title {
+  color: #f8fafc;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.ponn-swal-text {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.swal2-actions {
+  gap: 0.6rem;
+}
+
+.ponn-swal-confirm,
+.ponn-swal-cancel {
+  border: none;
+  border-radius: 0.85rem;
+  padding: 0.62rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+.ponn-swal-confirm {
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.28);
+}
+
+.ponn-swal-cancel {
+  background: rgba(148, 163, 184, 0.15);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+}
+
+.ponn-swal-confirm:hover,
+.ponn-swal-cancel:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.ponn-swal-input {
+  border-radius: 0.85rem;
+  border: 1px solid rgba(124, 58, 237, 0.45);
+  background: rgba(15, 23, 42, 0.64);
+  color: #e2e8f0;
+  padding: 0.62rem 0.72rem;
+}
+
+.ponn-swal-input:focus {
+  border-color: rgba(124, 58, 237, 0.9);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.ponn-swal-validation {
+  background: rgba(220, 38, 38, 0.16);
+  color: #fecaca;
+  border-radius: 0.6rem;
+}

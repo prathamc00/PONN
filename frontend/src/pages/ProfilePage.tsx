@@ -3,6 +3,7 @@ import { User, Mail, Phone, MapPin, Calendar, GraduationCap, Camera, Edit3, Save
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../utils/api';
+import { showError, showSuccess } from '../utils/dialog';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -33,10 +34,10 @@ export default function ProfilePage() {
 
     try {
       await apiFetch('/auth/me/aadhaar', { method: 'POST', body: formData });
-      alert('Aadhar card uploaded successfully! Pending admin verification.');
+      await showSuccess('Upload successful', 'Aadhar card uploaded successfully! Pending admin verification.');
       window.location.reload();
     } catch (err: any) {
-      alert(err.message || 'Upload failed');
+      await showError('Upload failed', err.message || 'Upload failed');
     } finally {
       setUploadingAadhar(false);
     }

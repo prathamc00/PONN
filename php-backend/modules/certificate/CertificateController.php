@@ -38,13 +38,34 @@ function getMyCertificates(): void {
 function getCertificates(): void {
     $db   = getDb();
     $stmt = $db->query('
-        SELECT cert.*, u.name AS studentName, u.email AS studentEmail, c.title AS courseTitle, c.category
+        SELECT cert.*, u.name AS studentName, u.email AS studentEmail, u.college AS studentCollege, u.branch AS studentBranch,
+               c.title AS courseTitle, c.category, c.instructor, c.level
         FROM certificates cert
         LEFT JOIN users u ON u.id = cert.student
         LEFT JOIN courses c ON c.id = cert.course
         ORDER BY cert.createdAt DESC
     ');
-    $certificates = $stmt->fetchAll();
+    $rows = $stmt->fetchAll();
+
+    $certificates = array_map(function ($row) {
+        $row['_id'] = (string) $row['id'];
+        $row['user'] = [
+            '_id' => isset($row['student']) ? (string) $row['student'] : '',
+            'name' => $row['studentName'] ?? null,
+            'email' => $row['studentEmail'] ?? null,
+            'college' => $row['studentCollege'] ?? null,
+            'branch' => $row['studentBranch'] ?? null,
+        ];
+        $row['course'] = [
+            '_id' => isset($row['course']) ? (string) $row['course'] : '',
+            'title' => $row['courseTitle'] ?? null,
+            'category' => $row['category'] ?? null,
+            'instructor' => $row['instructor'] ?? null,
+            'level' => $row['level'] ?? null,
+        ];
+        return $row;
+    }, $rows);
+
     jsonResponse(['success' => true, 'count' => count($certificates), 'certificates' => $certificates]);
 }
 

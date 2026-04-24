@@ -20,7 +20,7 @@ function setAuthUser(?array $user): void {
 // ── Load user from DB by ID ───────────────────────────────────────────────────
 function loadUserById(int $id): ?array {
     $db   = getDb();
-    $stmt = $db->prepare('SELECT id, name, email, college, branch, semester, phone, role, approvalStatus, aadhaarVerified, aadhaarCardPath, createdAt FROM users WHERE id = ?');
+    $stmt = $db->prepare('SELECT id, name, email, college, branch, semester, phone, role, approvalStatus, emailVerified, aadhaarVerified, aadhaarCardPath, passwordChangedAt, createdAt FROM users WHERE id = ?');
     $stmt->execute([$id]);
     $user = $stmt->fetch() ?: null;
     if ($user) {
@@ -36,6 +36,16 @@ function loadUserFromToken(string $token): array {
 
     if (!$user) {
         errorResponse('User not found', 401);
+    }
+
+    $tokenIssuedAt = (int) ($decoded['iat'] ?? 0);
+    $passwordChangedAt = isset($user['passwordChangedAt']) ? strtotime((string) $user['passwordChangedAt']) : 0;
+    if ($tokenIssuedAt > 0 && $passwordChangedAt > 0 && $tokenIssuedAt < $passwordChangedAt) {
+        throw new RuntimeException('Session expired. Please login again.', 401);
+    }
+
+    if ((int) ($user['emailVerified'] ?? 0) !== 1) {
+        throw new RuntimeException('Please verify your email before continuing.', 403);
     }
 
     return $user;

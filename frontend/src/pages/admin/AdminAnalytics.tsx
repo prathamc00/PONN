@@ -7,18 +7,25 @@ import { apiFetch } from '../../utils/api';
 function BarChart({ data, color = '#7C3AED' }: { data: { label: string; value: number }[]; color?: string }) {
   const max = Math.max(...data.map(d => d.value), 1);
   return (
-    <div className="flex items-end gap-2 h-36 w-full">
+    <div className="flex items-end gap-2 h-48 w-full pt-6">
       {data.map((d, i) => (
-        <div key={i} className="flex flex-col items-center gap-1 flex-1 min-w-0">
-          <span className="text-[10px] font-bold text-slate-400">{d.value}</span>
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: 1 }}
-            transition={{ delay: i * 0.05, duration: 0.4 }}
-            style={{ height: `${(d.value / max) * 100}%`, backgroundColor: color, originY: 1 }}
-            className="w-full rounded-t-xl min-h-[4px] opacity-90"
-          />
-          <span className="text-[9px] font-bold text-slate-500 truncate w-full text-center">{d.label}</span>
+        <div key={i} className="flex flex-col items-center flex-1 min-w-0 h-full">
+          <div className="w-full flex-1 flex flex-col justify-end items-center">
+            <div 
+               className="w-full flex flex-col justify-end items-center"
+               style={{ height: `${(d.value / max) * 100}%` }}
+            >
+               <span className="text-[11px] font-bold text-slate-500 mb-1.5 -mt-6">{d.value}</span>
+               <motion.div
+                 initial={{ scaleY: 0 }}
+                 animate={{ scaleY: 1 }}
+                 transition={{ delay: i * 0.05, duration: 0.4 }}
+                 style={{ backgroundColor: color, originY: 1 }}
+                 className="w-full flex-1 rounded-t-xl min-h-[4px] opacity-90"
+               />
+            </div>
+          </div>
+          <span className="text-[10px] font-bold text-slate-400 truncate w-full text-center mt-2 shrink-0">{d.label}</span>
         </div>
       ))}
     </div>

@@ -6,6 +6,8 @@
 
 require_once __DIR__ . '/../certificate/CertificateController.php';
 
+const QUIZ_ATTEMPT_LIMIT = 3;
+
 function canManageTest(array $test, array $user): bool {
     return $user['role'] === 'admin' || (string) $test['createdBy'] === (string) $user['id'];
 }
@@ -235,28 +237,34 @@ function startQuiz(int $id): void {
     }
     // ── END GATE ───────────────────────────────────────────────────────────────
 
-    $db      = getDb();
-    $attempt = $db->prepare('SELECT * FROM quiz_attempts WHERE quiz = ? AND student = ?');
-    $attempt->execute([$id, $user['id']]);
-    $existing = $attempt->fetch();
+    $db = getDb();
+
+    $activeStmt = $db->prepare('SELECT * FROM quiz_attempts WHERE quiz = ? AND student = ? AND completedAt IS NULL ORDER BY startedAt DESC, id DESC LIMIT 1');
+    $activeStmt->execute([$id, $user['id']]);
+    $activeAttempt = $activeStmt->fetch();
+
+    $countStmt = $db->prepare('SELECT COUNT(*) FROM quiz_attempts WHERE quiz = ? AND student = ?');
+    $countStmt->execute([$id, $user['id']]);
+    $attemptCount = (int) $countStmt->fetchColumn();
 
     $questions = array_map(fn($q, $i) => ['index' => $i, 'question' => $q['question'], 'options' => $q['options']], $test['questions'], array_keys($test['questions']));
 
-    if ($existing) {
-        if ($existing['completedAt']) {
-            jsonResponse(['success' => false, 'message' => 'You have already completed this quiz.', 'attempt' => $existing], 409);
-        }
+    if ($activeAttempt) {
         jsonResponse([
             'success'        => true,
             'message'        => 'Quiz resumed',
-            'attemptId'      => $existing['id'],
-            'startedAt'      => $existing['startedAt'] ? date('c', strtotime($existing['startedAt'])) : date('c'),
+            'attemptId'      => $activeAttempt['id'],
+            'startedAt'      => $activeAttempt['startedAt'] ? date('c', strtotime($activeAttempt['startedAt'])) : date('c'),
             'quizTitle'      => $test['title'],
             'courseName'     => $test['Course']['title'] ?? '',
             'durationMinutes'=> $test['durationMinutes'],
             'endTime'        => $test['endTime'],
             'questions'      => $questions,
         ]);
+    }
+
+    if ($attemptCount >= QUIZ_ATTEMPT_LIMIT) {
+        errorResponse('Maximum attempt limit reached. You can attend this quiz only 3 times. Contact admin to reset your attempts.', 403);
     }
 
     $db->prepare('INSERT INTO quiz_attempts (quiz, student, startedAt, createdAt, updatedAt) VALUES (?, ?, NOW(), NOW(), NOW())')
@@ -341,7 +349,7 @@ function retakeQuiz(int $id): void {
     $user = getAuthUser();
     $db   = getDb();
 
-    $stmt = $db->prepare('SELECT * FROM quiz_attempts WHERE quiz = ? AND student = ? ORDER BY completedAt DESC LIMIT 1');
+    $stmt = $db->prepare('SELECT * FROM quiz_attempts WHERE quiz = ? AND student = ? AND completedAt IS NOT NULL ORDER BY completedAt DESC, id DESC LIMIT 1');
     $stmt->execute([$id, $user['id']]);
     $attempt = $stmt->fetch();
 
@@ -354,8 +362,15 @@ function retakeQuiz(int $id): void {
         errorResponse('You scored 45% or higher and cannot reattempt this quiz.', 403);
     }
 
-    $db->prepare('DELETE FROM quiz_attempts WHERE quiz = ? AND student = ?')->execute([$id, $user['id']]);
-    jsonResponse(['success' => true, 'message' => 'Previous attempt cleared. You can now retake the quiz.']);
+    $countStmt = $db->prepare('SELECT COUNT(*) FROM quiz_attempts WHERE quiz = ? AND student = ?');
+    $countStmt->execute([$id, $user['id']]);
+    $attemptCount = (int) $countStmt->fetchColumn();
+
+    if ($attemptCount >= QUIZ_ATTEMPT_LIMIT) {
+        errorResponse('Maximum attempt limit reached. You can attend this quiz only 3 times. Contact admin to reset your attempts.', 403);
+    }
+
+    jsonResponse(['success' => true, 'message' => 'Retake allowed. Start the quiz to continue.']);
 }
 
 // ── getMyAttempts ─────────────────────────────────────────────────────────────

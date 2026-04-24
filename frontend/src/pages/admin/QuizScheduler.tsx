@@ -5,6 +5,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import * as XLSX from 'xlsx';
 import { apiFetch } from '../../utils/api';
+import { showConfirm, showError, showSuccess } from '../../utils/dialog';
 
 interface Question { question: string; options: string[]; correctAnswer: number; }
 interface QuizRecord {
@@ -84,7 +85,9 @@ export default function QuizScheduler() {
       await loadQuizzes();
       // Open editor for the new quiz
       if (data.test) handleEditQuiz(data.test);
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to create quiz', err.message || 'Unable to create quiz.');
+    }
   };
 
   const saveQuiz = async () => {
@@ -94,18 +97,28 @@ export default function QuizScheduler() {
         method: 'PUT',
         body: JSON.stringify({ title: editTitle, durationMinutes: editDuration, startTime: editStart, endTime: editEnd, questions }),
       });
-      alert('Quiz saved!');
+      await showSuccess('Quiz saved!', 'Your quiz changes have been updated.');
       await loadQuizzes();
       setView('list');
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to save quiz', err.message || 'Unable to save quiz.');
+    }
   };
 
   const deleteQuiz = async (id: string) => {
-    if (!confirm('Delete this quiz?')) return;
+    const shouldDelete = await showConfirm({
+      title: 'Delete quiz?',
+      text: 'Delete this quiz?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
     try {
       await apiFetch(`/tests/${id}`, { method: 'DELETE' });
       await loadQuizzes();
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to delete quiz', err.message || 'Unable to delete quiz.');
+    }
   };
 
   const addQuestion = () => setQuestions(prev => [...prev, { question: '', options: ['', '', '', ''], correctAnswer: 0 }]);

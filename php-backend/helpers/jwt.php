@@ -16,12 +16,23 @@ use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 
+function requireJwtSecret(string $envKey = 'JWT_SECRET', string $fallback = ''): string
+{
+    $secret = trim((string) env($envKey, $fallback));
+
+    if ($secret === '' || $secret === 'change_me_in_production' || strlen($secret) < 32) {
+        throw new RuntimeException("Server auth secret misconfigured: {$envKey}", 500);
+    }
+
+    return $secret;
+}
+
 /**
  * Sign a JWT token — equivalent to jwt.sign({ id }, secret, { expiresIn })
  */
 function jwtSign(int $userId, string $expiresIn = '7d'): string
 {
-    $secret = env('JWT_SECRET', 'change_me_in_production');
+    $secret = requireJwtSecret('JWT_SECRET');
 
     // Parse "7d", "15m" style expiry strings
     $seconds = parseExpiry($expiresIn);
@@ -41,7 +52,7 @@ function jwtSign(int $userId, string $expiresIn = '7d'): string
  */
 function jwtVerify(string $token): array
 {
-    $secret = env('JWT_SECRET', 'change_me_in_production');
+    $secret = requireJwtSecret('JWT_SECRET');
     try {
         $decoded = JWT::decode($token, new Key($secret, 'HS256'));
         return (array) $decoded;
@@ -77,6 +88,10 @@ function jwtDecode(string $token): ?array
  */
 function jwtSignWithSecret(int $userId, string $customSecret, string $expiresIn = '15m'): string
 {
+    if (trim($customSecret) === '') {
+        throw new RuntimeException('Invalid token signing secret', 500);
+    }
+
     $seconds = parseExpiry($expiresIn);
     $payload = [
         'id' => $userId,
@@ -92,6 +107,10 @@ function jwtSignWithSecret(int $userId, string $customSecret, string $expiresIn 
  */
 function jwtVerifyWithSecret(string $token, string $customSecret): array
 {
+    if (trim($customSecret) === '') {
+        throw new RuntimeException('Invalid or expired reset token', 400);
+    }
+
     try {
         $decoded = JWT::decode($token, new Key($customSecret, 'HS256'));
         return (array) $decoded;
@@ -105,16 +124,57 @@ function jwtVerifyWithSecret(string $token, string $customSecret): array
  */
 function parseExpiry(string $expiry): int
 {
-    if (is_numeric($expiry))
-        return (int) $expiry;
+    if (is_numeric($expiry)) {
+        $seconds = (int) $expiry;
+        return $seconds > 0 ? $seconds : 3600;
+    }
+
     $unit = strtolower(substr($expiry, -1));
     $value = (int) substr($expiry, 0, -1);
+
+    if ($value <= 0) {
+        return 3600;
+    }
+
     return match ($unit) {
         's' => $value,
         'm' => $value * 60,
         'h' => $value * 3600,
         'd' => $value * 86400,
         'w' => $value * 604800,
-        default => 7 * 86400,
+        default => 3600,
     };
+}
+
+function jwtSignPayloadWithSecret(array $payload, string $customSecret, string $expiresIn = '10m'): string
+{
+    if (trim($customSecret) === '') {
+        throw new RuntimeException('Invalid token signing secret', 500);
+    }
+
+    $seconds = parseExpiry($expiresIn);
+    $now = time();
+
+    $envelope = array_merge($payload, [
+        'iat' => $now,
+        'exp' => $now + $seconds,
+    ]);
+
+    return JWT::encode($envelope, $customSecret, 'HS256');
+}
+
+function jwtVerifyPayloadWithSecret(string $token, string $customSecret): array
+{
+    if (trim($customSecret) === '') {
+        throw new RuntimeException('Invalid token', 400);
+    }
+
+    try {
+        $decoded = JWT::decode($token, new Key($customSecret, 'HS256'));
+        return (array) $decoded;
+    } catch (ExpiredException $e) {
+        throw new RuntimeException('Token expired', 400);
+    } catch (Exception $e) {
+        throw new RuntimeException('Invalid token', 400);
+    }
 }

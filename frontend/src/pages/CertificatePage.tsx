@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import AnimatedTiltCard from '../components/ui/AnimatedTiltCard';
+import { showError } from '../utils/dialog';
 
 interface CertRecord {
   _id: string;
@@ -55,7 +56,7 @@ function CertificateTemplate({
   cert: CertRecord;
   userName: string;
   forExport?: boolean;
-  logoDataUrls: { cta: string; msme: string };
+  logoDataUrls: { cta: string; msme: string; signature: string };
 }) {
   const W = 1122;
   const H = 794;
@@ -72,8 +73,10 @@ function CertificateTemplate({
 
   const logoSrc = logoDataUrls.cta;
   const msmeSrc = logoDataUrls.msme;
+  const signatureSrc = logoDataUrls.signature;
   const [ctaLoadFailed, setCtaLoadFailed] = useState(false);
   const [msmeLoadFailed, setMsmeLoadFailed] = useState(false);
+  const [signatureLoadFailed, setSignatureLoadFailed] = useState(false);
 
   return (
     <div
@@ -121,7 +124,7 @@ function CertificateTemplate({
         { top: 22, right: 22, rotate: 90 },
         { bottom: 22, right: 22, rotate: 180 },
         { bottom: 22, left: 22, rotate: 270 },
-      ].map((corner, idx) => (
+      ].map(({ rotate, ...cornerPos }, idx) => (
         <div
           key={idx}
           style={{
@@ -131,8 +134,8 @@ function CertificateTemplate({
             pointerEvents: 'none',
             borderTop: '3px solid #6D28D9',
             borderLeft: '3px solid #6D28D9',
-            transform: `rotate(${corner.rotate}deg)`,
-            ...corner,
+            transform: `rotate(${rotate}deg)`,
+            ...cornerPos,
           }}
         />
       ))}
@@ -182,7 +185,7 @@ function CertificateTemplate({
         {msmeLoadFailed ? (
           <div
             style={{
-              height: 80,
+              height: 108,
               minWidth: 130,
               padding: '0 10px',
               border: '1px solid #6D28D9',
@@ -203,7 +206,7 @@ function CertificateTemplate({
             alt="MSME"
             crossOrigin="anonymous"
             onError={() => setMsmeLoadFailed(true)}
-            style={{ height: 80, width: 'auto', objectFit: 'contain' }}
+            style={{ height: 108, width: 'auto', objectFit: 'contain' }}
           />
         )}
       </div>
@@ -227,8 +230,8 @@ function CertificateTemplate({
       </div>
 
       {/* ── BODY TEXT ── */}
-      <div style={{ padding: '16px 62px 0 62px', lineHeight: 1.9, color: '#1a1a1a', fontSize: 16 }}>
-        <p style={{ marginBottom: 16, textAlign: 'justify' }}>
+      <div style={{ padding: '16px 62px 0 62px', lineHeight: 1.9, color: '#1a1a1a', fontSize: 16, textAlign: 'center' }}>
+        <p style={{ marginBottom: 16 }}>
           This is to certify that{' '}
           <strong style={{ color: '#DC2626' }}>{userName}</strong>,{' '}
           has successfully completed the assessment for{' '}
@@ -238,11 +241,11 @@ function CertificateTemplate({
           and has been awarded a grade of{' '}
           <strong style={{ color: '#1D4ED8' }}>{cert.grade}</strong>.
         </p>
-        <p style={{ marginBottom: 16, textAlign: 'justify' }}>
+        <p style={{ marginBottom: 16 }}>
           The performance during the assessment was found satisfactory, demonstrating keen
           interest to learn and a commitment to academic excellence.
         </p>
-        <p style={{ textAlign: 'justify' }}>
+        <p>
           We appreciate the effort and wish continued success in all future endeavors.
         </p>
       </div>
@@ -260,12 +263,24 @@ function CertificateTemplate({
           <div style={{ fontSize: 12, color: '#777', marginBottom: 3 }}>Certificate ID</div>
           <div style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 'bold', borderTop: '1.5px solid #6D28D9', paddingTop: 4 }}>{cert.certificateId}</div>
         </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontFamily: '"Brush Script MT", cursive', fontSize: 32, color: '#1E1B4B',
-            borderBottom: '2px solid #6D28D9', paddingBottom: 4, minWidth: 180, marginBottom: 4,
-          }}>{instructor}</div>
-          <div style={{ fontSize: 11, color: '#666', letterSpacing: 1, textTransform: 'uppercase' }}>Authorized Signatory</div>
+        <div style={{ textAlign: 'center', minWidth: 220 }}>
+          {signatureLoadFailed ? (
+            <>
+              <div style={{
+                fontFamily: '"Brush Script MT", cursive', fontSize: 32, color: '#1E1B4B',
+                borderBottom: '2px solid #6D28D9', paddingBottom: 4, minWidth: 180, marginBottom: 4,
+              }}>{instructor}</div>
+              <div style={{ fontSize: 11, color: '#666', letterSpacing: 1, textTransform: 'uppercase' }}>Authorized Signatory</div>
+            </>
+          ) : (
+            <img
+              src={signatureSrc}
+              alt="Authorized Signature"
+              crossOrigin="anonymous"
+              onError={() => setSignatureLoadFailed(true)}
+              style={{ height: 96, width: 'auto', objectFit: 'contain', display: 'block', marginLeft: 'auto' }}
+            />
+          )}
         </div>
       </div>
 
@@ -319,7 +334,7 @@ async function tryLoadImg(src: string): Promise<HTMLImageElement | null> {
 async function buildCertificateDataUrl(
   cert: CertRecord,
   userName: string,
-  logoDataUrls: { cta: string; msme: string },
+  logoDataUrls: { cta: string; msme: string; signature: string },
 ): Promise<string> {
   const W = 1122, H = 794, S = 2; // S = scale factor for retina
 
@@ -330,9 +345,10 @@ async function buildCertificateDataUrl(
     day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  const [ctaImg, msmeImg] = await Promise.all([
+  const [ctaImg, msmeImg, signatureImg] = await Promise.all([
     tryLoadImg(logoDataUrls.cta),
     tryLoadImg(logoDataUrls.msme),
+    tryLoadImg(logoDataUrls.signature),
   ]);
 
   const cv = document.createElement('canvas');
@@ -388,14 +404,14 @@ async function buildCertificateDataUrl(
   }
 
   if (msmeImg) {
-    const msmeH = 78;
+    const msmeH = 108;
     const msmeW = msmeImg.naturalWidth * (msmeH / msmeImg.naturalHeight);
-    c.drawImage(msmeImg, W - 60 - msmeW, 42, msmeW, msmeH);
+    c.drawImage(msmeImg, W - 60 - msmeW, 28, msmeW, msmeH);
   } else {
     const boxW = 130;
     c.strokeStyle = '#6D28D9';
     c.lineWidth = 1;
-    c.strokeRect(W - 60 - boxW, 42, boxW, 78);
+    c.strokeRect(W - 60 - boxW, 28, boxW, 108);
     c.fillStyle = '#6D28D9';
     c.font = 'bold 13px Arial, sans-serif';
     c.textAlign = 'center';
@@ -421,37 +437,56 @@ async function buildCertificateDataUrl(
   c.font = 'italic normal 46px "Brush Script MT", cursive';
   c.fillText('Certificate of Achievement', 62, 228);
 
-  // ── Body text (justified paragraphs with coloured spans) ──
-  c.font = '16px "Times New Roman", serif';
-  const lh = 30; let y = 274;
+  // ── Body text (center-aligned with coloured spans) ──
+  const lh = 30;
+  let y = 274;
+  const bodyCenterX = W / 2;
 
-  function seg(text: string, color: string, bold = false) {
-    c.fillStyle = color;
-    c.font = (bold ? 'bold ' : '') + '16px "Times New Roman", serif';
-    const w = c.measureText(text).width;
-    c.fillText(text, curX, y);
-    curX += w;
+  function drawCenteredSegments(segments: Array<{ text: string; color: string; bold?: boolean }>, rowY: number) {
+    const widths = segments.map((segment) => {
+      c.font = `${segment.bold ? 'bold ' : ''}16px "Times New Roman", serif`;
+      return c.measureText(segment.text).width;
+    });
+    const totalWidth = widths.reduce((sum, width) => sum + width, 0);
+    let x = bodyCenterX - totalWidth / 2;
+
+    segments.forEach((segment, idx) => {
+      c.font = `${segment.bold ? 'bold ' : ''}16px "Times New Roman", serif`;
+      c.fillStyle = segment.color;
+      c.textAlign = 'left';
+      c.fillText(segment.text, x, rowY);
+      x += widths[idx];
+    });
   }
-  let curX = 62;
 
-  seg('This is to certify that ', '#1a1a1a');
-  seg(userName + ',', '#DC2626', true);
-  seg(' has successfully completed the assessment for', '#1a1a1a');
-  y += lh; curX = 62;
-  seg(`"${courseTitle} — Course Completion"`, '#DC2626', true);
-  seg(' in our Organization with a score of', '#1a1a1a');
-  y += lh; curX = 62;
-  seg(`${cert.scorePercent}%`, '#1D4ED8', true);
-  seg(' and has been awarded a grade of ', '#1a1a1a');
-  seg(cert.grade + '.', '#1D4ED8', true);
+  drawCenteredSegments([
+    { text: 'This is to certify that ', color: '#1a1a1a' },
+    { text: `${userName},`, color: '#DC2626', bold: true },
+    { text: ' has successfully completed the assessment for', color: '#1a1a1a' },
+  ], y);
 
-  y += lh + 8; curX = 62;
-  c.fillStyle = '#1a1a1a'; c.font = '16px "Times New Roman", serif'; c.textAlign = 'left';
-  c.fillText('The performance during the assessment was found satisfactory, demonstrating keen', 62, y);
   y += lh;
-  c.fillText('interest to learn and a commitment to academic excellence.', 62, y);
+  drawCenteredSegments([
+    { text: `"${courseTitle} — Course Completion"`, color: '#DC2626', bold: true },
+    { text: ' in our Organization with a score of', color: '#1a1a1a' },
+  ], y);
+
+  y += lh;
+  drawCenteredSegments([
+    { text: `${cert.scorePercent}%`, color: '#1D4ED8', bold: true },
+    { text: ' and has been awarded a grade of ', color: '#1a1a1a' },
+    { text: `${cert.grade}.`, color: '#1D4ED8', bold: true },
+  ], y);
+
   y += lh + 8;
-  c.fillText('We appreciate the effort and wish continued success in all future endeavors.', 62, y);
+  c.fillStyle = '#1a1a1a';
+  c.font = '16px "Times New Roman", serif';
+  c.textAlign = 'center';
+  c.fillText('The performance during the assessment was found satisfactory, demonstrating keen', bodyCenterX, y);
+  y += lh;
+  c.fillText('interest to learn and a commitment to academic excellence.', bodyCenterX, y);
+  y += lh + 8;
+  c.fillText('We appreciate the effort and wish continued success in all future endeavors.', bodyCenterX, y);
 
   // ── Watermark ──
   c.save();
@@ -487,13 +522,19 @@ async function buildCertificateDataUrl(
   drawFooterCol('Certificate ID', cert.certificateId, W / 2, 'center');
 
   // Signature
-  c.textAlign = 'right'; c.fillStyle = '#1E1B4B';
-  c.font = 'italic 30px "Brush Script MT", cursive';
-  c.fillText(instructor, W - 62, fy - 8);
-  c.strokeStyle = '#6D28D9'; c.lineWidth = 1.5;
-  c.beginPath(); c.moveTo(W - 62 - 180, fy - 1); c.lineTo(W - 62, fy - 1); c.stroke();
-  c.fillStyle = '#666'; c.font = '10px Arial, sans-serif';
-  c.fillText('AUTHORIZED SIGNATORY', W - 62, fy + 14);
+  if (signatureImg) {
+    const sigH = 96;
+    const sigW = signatureImg.naturalWidth * (sigH / signatureImg.naturalHeight);
+    c.drawImage(signatureImg, W - 62 - sigW, fy - 100, sigW, sigH);
+  } else {
+    c.textAlign = 'right'; c.fillStyle = '#1E1B4B';
+    c.font = 'italic 30px "Brush Script MT", cursive';
+    c.fillText(instructor, W - 62, fy - 8);
+    c.strokeStyle = '#6D28D9'; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(W - 62 - 180, fy - 1); c.lineTo(W - 62, fy - 1); c.stroke();
+    c.fillStyle = '#666'; c.font = '10px Arial, sans-serif';
+    c.fillText('AUTHORIZED SIGNATORY', W - 62, fy + 14);
+  }
 
   return cv.toDataURL('image/png', 1.0);
 }
@@ -511,6 +552,7 @@ export default function CertificatePage() {
   const [logoDataUrls, setLogoDataUrls] = useState({
     cta:  `${base}/cta_logo.png`,
     msme: `${base}/msme_logo.png`,
+    signature: `${base}/signature.png`,
   });
 
   const { user } = useAuth();
@@ -530,8 +572,13 @@ export default function CertificatePage() {
         `${origin}/portal/msme_logo.png`,
         `${origin}/msme_logo.png`,
       ]),
+      firstSuccessfulDataUrl([
+        `${base}/signature.png`,
+        `${origin}/portal/signature.png`,
+        `${origin}/signature.png`,
+      ]),
     ])
-      .then(([cta, msme]) => setLogoDataUrls({ cta, msme }))
+      .then(([cta, msme, signature]) => setLogoDataUrls({ cta, msme, signature }))
       .catch(() => { /* keep fallback URL paths on error */ });
   }, [base]);
 
@@ -554,7 +601,7 @@ export default function CertificatePage() {
       document.body.removeChild(link);
     } catch (err) {
       console.error('Certificate download failed:', err);
-      alert('Download failed. Please try again.');
+      await showError('Download failed', 'Please try again.');
     } finally {
       setDownloading(null);
     }
@@ -601,7 +648,7 @@ export default function CertificatePage() {
                 className="glass-panel rounded-[3rem] border-white/5 shadow-2xl overflow-hidden flex flex-col group backdrop-blur-3xl"
               >
                 {/* ── Certificate PREVIEW (scaled) ── */}
-                <div className="p-4 flex items-start justify-start bg-white/5 border-b border-white/5 overflow-hidden">
+                <div className="p-4 flex items-center justify-center bg-white/5 border-b border-white/5 overflow-hidden">
                   <div style={{
                     width:  1122 * 0.47,
                     height: 794  * 0.47,

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Clock, Sparkles, PlayCircle, CheckCircle2, Calendar, HelpCircle, ChevronRight, RotateCcw, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiFetch } from '../utils/api';
+import { showAlreadyAttemptedQuizAlert, showError } from '../utils/dialog';
 
 interface TestRecord {
   _id: string;
@@ -13,6 +14,8 @@ interface TestRecord {
   endTime: string;
   questions: any[];
 }
+
+const QUIZ_ATTEMPT_LIMIT = 3;
 
 export default function TestPage() {
   const [tests, setTests] = useState<TestRecord[]>([]);
@@ -57,12 +60,25 @@ export default function TestPage() {
     fetchData();
   }, []);
 
+  const getAttemptQuizId = (attempt: any): string => {
+    if (!attempt) return '';
+    if (typeof attempt.quiz === 'object' && attempt.quiz) {
+      return String(attempt.quiz._id || attempt.quiz.id || attempt.quiz.quiz || '');
+    }
+    return String(attempt.quiz ?? attempt.quizId ?? '');
+  };
+
   const getCourseName = (t: TestRecord) => typeof t.course === 'object' && t.course ? t.course.title : '—';
+  const getAttemptCount = (testId: string) => {
+    const normalizedTestId = String(testId);
+    return attempts.filter((a: any) => getAttemptQuizId(a) === normalizedTestId).length;
+  };
+
   const getStatus = (t: TestRecord) => {
     const now = new Date();
+    const testId = String(t._id);
     const attempted = attempts.find((a: any) => {
-      const quizId = typeof a.quiz === 'object' && a.quiz ? a.quiz._id : a.quiz;
-      return quizId === t._id;
+      return getAttemptQuizId(a) === testId;
     });
     if (attempted?.completedAt) return 'Completed';
     if (t.startTime && now < new Date(t.startTime)) return 'Upcoming';
@@ -71,9 +87,9 @@ export default function TestPage() {
   };
 
   const getAttemptStats = (testId: string) => {
+    const normalizedTestId = String(testId);
     const attempt = attempts.find((a: any) => {
-      const quizId = typeof a.quiz === 'object' ? a.quiz._id : a.quiz;
-      return quizId === testId && a.completedAt;
+      return getAttemptQuizId(a) === normalizedTestId && a.completedAt;
     });
     if (!attempt) return null;
     const percentage = attempt.totalMarks > 0 ? (attempt.score / attempt.totalMarks) * 100 : 0;
@@ -87,7 +103,14 @@ export default function TestPage() {
       sessionStorage.setItem('activeQuiz', JSON.stringify(data));
       navigate(`/test/take/${testId}`, { state: { quizData: data } });
     } catch (err: any) {
-      alert(err.message || 'Failed to start quiz');
+      const message = err.message || 'Failed to start quiz';
+      if (/already|completed|attempted/i.test(message)) {
+        await showAlreadyAttemptedQuizAlert();
+      } else if (/limit|maximum|only 3 times|contact admin/i.test(message)) {
+        await showError('Attempt limit reached', message);
+      } else {
+        await showError('Unable to start quiz', message);
+      }
     }
   };
 
@@ -111,7 +134,9 @@ export default function TestPage() {
           {tests.map((test, i) => {
             const status = getStatus(test);
             const stats = getAttemptStats(test._id);
-            const canRetake = stats !== null && stats.percentage < 45;
+            const attemptCount = getAttemptCount(test._id);
+            const canRetake = stats !== null && stats.percentage < 45 && attemptCount < QUIZ_ATTEMPT_LIMIT;
+            const reachedAttemptLimit = attemptCount >= QUIZ_ATTEMPT_LIMIT;
 
             // Check enrollment and course completion
             const testCourseId = typeof test.course === 'object' && test.course ? String((test.course as any)._id || (test.course as any).id) : String(test.course);
@@ -183,24 +208,37 @@ export default function TestPage() {
                       <PlayCircle className="w-5 h-5" /> Start Quiz
                     </button>
                   ) : status === 'Completed' ? (
-                    <div className="flex gap-2">
-                       <div className={`flex-1 py-4 ${canRetake ? 'bg-amber-400/10 text-amber-500 border-amber-400/20' : 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'} text-center rounded-2xl text-sm font-bold flex items-center justify-center gap-2 border`}>
-                         <CheckCircle2 className="w-5 h-5" /> Completed — Score: {stats?.score}
-                       </div>
-                       {canRetake && (
-                         <button 
-                           onClick={async () => {
-                             try {
-                               await apiFetch(`/tests/${test._id}/retake`, { method: 'POST' });
-                               handleStartQuiz(test._id);
-                             } catch (err: any) { alert(err.message || 'Error initializing retake'); }
-                           }} 
-                           className="px-6 py-4 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-2xl font-bold transition-all"
-                           title="Retake Quiz"
-                         >
-                           <RotateCcw className="w-5 h-5"/>
-                         </button>
-                       )}
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                         <div className={`flex-1 py-4 ${canRetake ? 'bg-amber-400/10 text-amber-500 border-amber-400/20' : 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'} text-center rounded-2xl text-sm font-bold flex items-center justify-center gap-2 border`}>
+                           <CheckCircle2 className="w-5 h-5" /> Quiz Submitted
+                         </div>
+                         {canRetake && (
+                           <button 
+                             onClick={async () => {
+                               try {
+                                 await apiFetch(`/tests/${test._id}/retake`, { method: 'POST' });
+                                 handleStartQuiz(test._id);
+                               } catch (err: any) {
+                                 await showError('Retake failed', err.message || 'Error initializing retake');
+                               }
+                             }} 
+                             className="px-6 py-4 bg-brand-purple hover:bg-brand-purple/80 text-white rounded-2xl font-bold transition-all"
+                             title="Retake Quiz"
+                           >
+                             <RotateCcw className="w-5 h-5"/>
+                           </button>
+                         )}
+                      </div>
+                      {stats && stats.percentage < 45 && reachedAttemptLimit && (
+                        <div className="w-full py-2.5 bg-rose-500/10 text-rose-400 text-center rounded-xl text-xs font-bold border border-rose-500/20">
+                          Attempt limit reached (3/3). Contact admin to reset attempts.
+                        </div>
+                      )}
+                    </div>
+                  ) : reachedAttemptLimit ? (
+                    <div className="w-full py-4 bg-rose-500/10 text-rose-400 text-center rounded-2xl text-sm font-bold border border-rose-500/20">
+                      Attempt limit reached (3/3)
                     </div>
                   ) : (
                     <div className="w-full py-4 bg-white/5 text-slate-500 text-center rounded-2xl text-sm font-bold border border-white/5">

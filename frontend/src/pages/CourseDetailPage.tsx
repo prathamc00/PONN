@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { apiFetch } from '../utils/api';
 import PremiumVideoPlayer from '../components/PremiumVideoPlayer';
+import { showError } from '../utils/dialog';
 
 // Resolve a relative upload path to a full URL
 const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
@@ -103,7 +104,7 @@ export default function CourseDetailPage() {
         setActiveModuleId(String(firstVideo.id || firstVideo._id || ''));
       }
     } catch (err: any) {
-      alert(err.message || 'Enrollment failed');
+      await showError('Enrollment failed', err.message || 'Enrollment failed');
     } finally {
       setEnrolling(false);
     }

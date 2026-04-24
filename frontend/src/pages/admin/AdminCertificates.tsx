@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Award, Search, Download, CheckCircle, Trash2, X, BookOpen, GraduationCap, Calendar, Medal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../../utils/api';
+import { showConfirm, showError } from '../../utils/dialog';
 
 interface Certificate {
   _id: string;
@@ -37,7 +38,25 @@ export default function AdminCertificates() {
     try {
       setLoading(true);
       const data = await apiFetch('/certificates');
-      setCertificates(data.certificates || []);
+      const normalized = (data.certificates || []).map((cert: any) => ({
+        ...cert,
+        _id: String(cert._id || cert.id || ''),
+        user: cert.user || {
+          _id: String(cert.student || ''),
+          name: cert.studentName || '',
+          email: cert.studentEmail || '',
+          college: cert.studentCollege || cert.college || '',
+          branch: cert.studentBranch || cert.branch || '',
+        },
+        course: cert.course && typeof cert.course === 'object' ? cert.course : {
+          _id: String(cert.course || ''),
+          title: cert.courseTitle || '',
+          category: cert.category || '',
+          instructor: cert.instructor || '',
+          level: cert.level || '',
+        },
+      }));
+      setCertificates(normalized);
     } catch (err) {
       console.error('Failed to load certificates', err);
     } finally {
@@ -48,13 +67,19 @@ export default function AdminCertificates() {
   useEffect(() => { loadCertificates(); }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to revoke this certificate? This cannot be undone.')) return;
+    const shouldDelete = await showConfirm({
+      title: 'Revoke Certificate?',
+      text: 'Are you sure you want to revoke this certificate? This cannot be undone.',
+      confirmText: 'Revoke',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
     try {
       await apiFetch(`/certificates/${id}`, { method: 'DELETE' });
       setCertificates(prev => prev.filter(c => c._id !== id));
       setSelectedCert(null);
     } catch (err: any) {
-      alert(err.message);
+      await showError('Failed to revoke', err.message || 'Unable to revoke this certificate.');
     }
   };
 

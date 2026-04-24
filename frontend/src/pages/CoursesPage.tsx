@@ -6,6 +6,7 @@ import { Skeleton } from '../components/Loading';
 import { apiFetch } from '../utils/api';
 import AnimatedTiltCard from '../components/ui/AnimatedTiltCard';
 import RippleButton from '../components/ui/RippleButton';
+import { showError } from '../utils/dialog';
 
 const gradientColors = [
   'from-brand-purple to-brand-blue',
@@ -46,7 +47,7 @@ export default function CoursesPage() {
       await apiFetch(`/courses/${courseId}/enroll`, { method: 'POST' });
       setEnrolledIds(prev => new Set([...prev, courseId]));
     } catch (err: any) {
-      alert(err.message || 'Failed to enroll');
+      await showError('Enrollment failed', err.message || 'Failed to enroll');
     } finally {
       setEnrollingId(null);
     }

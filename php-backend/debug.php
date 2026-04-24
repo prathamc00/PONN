@@ -1,4 +1,15 @@
 <?php
+require_once __DIR__ . '/config/env.php';
+
+$appEnv = strtolower((string) env('APP_ENV', 'production'));
+$clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
+$isLocal = in_array($clientIp, ['127.0.0.1', '::1'], true);
+
+if ($appEnv !== 'development' || !$isLocal) {
+    http_response_code(404);
+    exit;
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -23,9 +34,7 @@ foreach ($lines as $line) {
     }
 }
 
-echo "<p>DB_HOST: " . ($env['DB_HOST'] ?? 'NOT SET') . "</p>";
-echo "<p>DB_NAME: " . ($env['DB_NAME'] ?? 'NOT SET') . "</p>";
-echo "<p>DB_USER: " . ($env['DB_USER'] ?? 'NOT SET') . "</p>";
+echo "<p>DB configuration loaded: " . ((isset($env['DB_HOST'], $env['DB_NAME'], $env['DB_USER']) ? 'yes' : 'no')) . "</p>";
 
 try {
     $pdo = new PDO(

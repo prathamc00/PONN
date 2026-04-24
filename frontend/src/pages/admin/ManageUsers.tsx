@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Users, Search, Filter, Download, CheckCircle, XCircle, Trash2, Mail, ChevronLeft, ChevronRight, ShieldCheck, FileText, Plus
+  Users, Search, Filter, Download, CheckCircle, XCircle, Trash2, Mail, ChevronLeft, ChevronRight, ShieldCheck, FileText, Plus, RotateCcw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { apiFetch, downloadBlob } from '../../utils/api';
+import { showConfirm } from '../../utils/dialog';
 
 interface UserRecord {
   _id: string;
@@ -78,12 +79,36 @@ export default function ManageUsers() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this user?')) return;
+    const shouldDelete = await showConfirm({
+      title: 'Delete user?',
+      text: 'Delete this user?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
     try {
       await apiFetch(`/users/${id}`, { method: 'DELETE' });
       await loadUsers();
       toast.success('User deleted successfully');
     } catch (err: any) { toast.error(err.message); }
+  };
+
+  const handleResetQuizAttempts = async (id: string, name: string) => {
+    const shouldReset = await showConfirm({
+      title: 'Reset quiz attempts?',
+      text: `This will clear all quiz attempts for ${name}. The user can take quizzes again from attempt 1.`,
+      confirmText: 'Reset Attempts',
+      cancelText: 'Cancel',
+    });
+    if (!shouldReset) return;
+
+    try {
+      const data = await apiFetch(`/users/${id}/quiz-attempts/reset`, { method: 'POST' });
+      const cleared = Number(data?.clearedAttempts || 0);
+      toast.success(`Reset complete. Cleared ${cleared} attempt${cleared === 1 ? '' : 's'}.`);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset quiz attempts');
+    }
   };
 
   const handleExport = async () => {
@@ -268,6 +293,15 @@ export default function ManageUsers() {
                               <XCircle className="w-4 h-4" />
                             </button>
                           </>
+                        )}
+                        {user.role === 'student' && (
+                          <button
+                            onClick={() => handleResetQuizAttempts(user._id, user.name)}
+                            className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                            title="Reset quiz attempts"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
                         )}
                         <button onClick={() => handleDelete(user._id)} className="p-2 bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors">
                           <Trash2 className="w-4 h-4" />

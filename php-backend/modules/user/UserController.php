@@ -7,11 +7,15 @@
 // ── getUsers ──────────────────────────────────────────────────────────────────
 function getUsers(): void {
     $page   = max(1, (int) query('page', 1));
-    $limit  = min(100, (int) query('limit', 100));
-    $offset = ($page - 1) * $limit;
     $db     = getDb();
 
     $count = $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
+    $limitParam = query('limit', null);
+    $limit = $limitParam === null || $limitParam === ''
+        ? (int) $count
+        : min(max(1, (int) $limitParam), (int) $count);
+    $offset = ($page - 1) * $limit;
+
     $stmt  = $db->prepare('
         SELECT 
             u.id,
@@ -127,6 +131,26 @@ function verifyAadhaar(int $id): void {
 
     $updated = loadUserById($id);
     jsonResponse(['success' => true, 'message' => 'Aadhaar status updated', 'user' => $updated]);
+}
+
+// ── resetUserQuizAttempts ─────────────────────────────────────────────────────
+function resetUserQuizAttempts(int $id): void {
+    $db   = getDb();
+    $stmt = $db->prepare('SELECT id FROM users WHERE id = ?');
+    $stmt->execute([$id]);
+    if (!$stmt->fetch()) errorResponse('User not found', 404);
+
+    $countStmt = $db->prepare('SELECT COUNT(*) FROM quiz_attempts WHERE student = ?');
+    $countStmt->execute([$id]);
+    $clearedAttempts = (int) $countStmt->fetchColumn();
+
+    $db->prepare('DELETE FROM quiz_attempts WHERE student = ?')->execute([$id]);
+
+    jsonResponse([
+        'success' => true,
+        'message' => 'Quiz attempts reset successfully',
+        'clearedAttempts' => $clearedAttempts,
+    ]);
 }
 
 // ── addInstructor (admin creates instructor directly) ─────────────────────────

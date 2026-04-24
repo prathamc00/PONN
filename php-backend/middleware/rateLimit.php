@@ -8,7 +8,7 @@
  */
 
 function checkRateLimit(string $key, int $maxRequests, int $windowSeconds): void {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $ip = function_exists('getClientIpAddress') ? getClientIpAddress() : ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
 
     try {
         $db = getDb();
@@ -49,6 +49,14 @@ function checkRateLimit(string $key, int $maxRequests, int $windowSeconds): void
 
         // Check limit
         if ($row['requests'] >= $maxRequests) {
+            if (function_exists('logSecurityEvent')) {
+                logSecurityEvent('rate_limit_exceeded', 'warning', [
+                    'rateKey' => $key,
+                    'windowSeconds' => $windowSeconds,
+                    'maxRequests' => $maxRequests,
+                    'currentRequests' => (int) $row['requests'],
+                ], 429);
+            }
             errorResponse('Too many requests, please try again later.', 429);
         }
 

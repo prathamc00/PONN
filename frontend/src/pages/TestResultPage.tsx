@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Award, CheckCircle2, ArrowRight, RotateCcw, Share2, Sparkles, Trophy, Target, Clock, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiFetch } from '../utils/api';
+import { showError } from '../utils/dialog';
 
 export default function TestResultPage() {
   const location = useLocation();
@@ -25,7 +26,7 @@ export default function TestResultPage() {
       await apiFetch(`/tests/${quizId}/retake`, { method: 'POST' });
       navigate('/test', { replace: true });
     } catch (err: any) {
-      alert(err.message || 'Failed to initialize retake');
+      await showError('Retake failed', err.message || 'Failed to initialize retake');
     } finally {
       setRetaking(false);
     }

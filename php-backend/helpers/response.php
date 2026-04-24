@@ -6,6 +6,14 @@
 
 function jsonResponse(array $data, int $statusCode = 200): void {
     http_response_code($statusCode);
+    if (function_exists('getRequestId')) {
+        $requestId = getRequestId();
+        header('X-Request-Id: ' . $requestId);
+        if (!isset($data['requestId'])) {
+            $data['requestId'] = $requestId;
+        }
+    }
+
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Cache-Control: post-check=0, pre-check=0', false);
     header('Pragma: no-cache');
@@ -18,6 +26,16 @@ function successResponse(string $message, array $data = [], int $code = 200): vo
 }
 
 function errorResponse(string $message, int $code = 400): void {
+    if (function_exists('logSecurityEvent')) {
+        if ($code === 429) {
+            logSecurityEvent('api_rate_limited', 'warning', ['message' => $message], $code);
+        } elseif ($code === 401 || $code === 403) {
+            logSecurityEvent('auth_access_denied', 'warning', ['message' => $message], $code);
+        } elseif ($code >= 500) {
+            logSecurityEvent('api_error', 'error', ['message' => $message], $code);
+        }
+    }
+
     jsonResponse(['success' => false, 'message' => $message], $code);
 }
 

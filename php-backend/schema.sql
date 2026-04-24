@@ -18,15 +18,17 @@ CREATE TABLE IF NOT EXISTS `users` (
     `phone`           VARCHAR(20)  DEFAULT NULL,
     `role`            ENUM('student','instructor','admin') NOT NULL DEFAULT 'student',
     `approvalStatus`  ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+    `emailVerified`   TINYINT(1)   NOT NULL DEFAULT 0,
     `aadhaarVerified` TINYINT(1)   NOT NULL DEFAULT 0,
     `aadhaarCardPath` VARCHAR(500) DEFAULT NULL,
+    `passwordChangedAt` DATETIME   DEFAULT NULL,
     `createdAt`       DATETIME     NOT NULL,
     `updatedAt`       DATETIME     NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Default admin user (password: Admin@123 — CHANGE THIS IMMEDIATELY)
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `approvalStatus`, `aadhaarVerified`, `createdAt`, `updatedAt`)
-VALUES ('Admin', 'admin@crismatech.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'approved', 0, NOW(), NOW());
+INSERT INTO `users` (`name`, `email`, `password`, `role`, `approvalStatus`, `emailVerified`, `aadhaarVerified`, `passwordChangedAt`, `createdAt`, `updatedAt`)
+VALUES ('Admin', 'admin@crismatech.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'approved', 1, 0, NOW(), NOW(), NOW());
 
 -- ── OTPs ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `otps` (
@@ -36,6 +38,20 @@ CREATE TABLE IF NOT EXISTS `otps` (
     `attempts`  INT          NOT NULL DEFAULT 0,
     `expiresAt` DATETIME     NOT NULL,
     `createdAt` DATETIME     NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- -- Password reset tokens (one-time, expiring)
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+    `id`        INT AUTO_INCREMENT PRIMARY KEY,
+    `userId`    INT NOT NULL,
+    `tokenHash` CHAR(64) NOT NULL,
+    `expiresAt` DATETIME NOT NULL,
+    `usedAt`    DATETIME DEFAULT NULL,
+    `createdAt` DATETIME NOT NULL,
+    UNIQUE KEY `uq_token_hash` (`tokenHash`),
+    KEY `idx_user` (`userId`),
+    KEY `idx_expires` (`expiresAt`),
+    FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Courses ───────────────────────────────────────────────────
@@ -203,6 +219,27 @@ CREATE TABLE IF NOT EXISTS `rate_limit` (
     `requests`     INT         NOT NULL DEFAULT 1,
     `window_start` DATETIME    NOT NULL,
     UNIQUE KEY `uq_ip_key` (`ip`, `rate_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Security Monitoring / Audit Events ────────────────────────
+CREATE TABLE IF NOT EXISTS `security_events` (
+    `id`         INT AUTO_INCREMENT PRIMARY KEY,
+    `requestId`  VARCHAR(64)  NOT NULL,
+    `eventType`  VARCHAR(64)  NOT NULL,
+    `severity`   ENUM('info','warning','error','critical') NOT NULL DEFAULT 'info',
+    `method`     VARCHAR(10)  DEFAULT NULL,
+    `route`      VARCHAR(255) DEFAULT NULL,
+    `ip`         VARCHAR(45)  DEFAULT NULL,
+    `userAgent`  VARCHAR(255) DEFAULT NULL,
+    `userId`     INT          DEFAULT NULL,
+    `statusCode` INT          DEFAULT NULL,
+    `details`    JSON         DEFAULT NULL,
+    `createdAt`  DATETIME     NOT NULL,
+    KEY `idx_security_created` (`createdAt`),
+    KEY `idx_security_event` (`eventType`),
+    KEY `idx_security_severity` (`severity`),
+    KEY `idx_security_request` (`requestId`),
+    KEY `idx_security_ip` (`ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 1;

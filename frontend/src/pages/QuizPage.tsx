@@ -4,6 +4,7 @@ import { Clock, ShieldAlert, AlertTriangle, ArrowRight, Focus, Maximize } from '
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../utils/api';
 import { useAntiCheat } from '../hooks/useAntiCheat';
+import { showError } from '../utils/dialog';
 
 interface Question {
   question: string;
@@ -47,7 +48,7 @@ export default function QuizPage() {
         replace: true 
       });
     } catch (err: any) {
-      alert(err.message || 'Failed to submit quiz');
+      await showError('Submission failed', err.message || 'Failed to submit quiz');
       navigate('/test', { replace: true });
     }
   };

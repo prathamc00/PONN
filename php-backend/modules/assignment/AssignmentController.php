@@ -49,6 +49,15 @@ function getManagedAssignments(): void {
     }
 
     $assignments = $stmt->fetchAll();
+    foreach ($assignments as &$a) {
+        $a['_id'] = (string) $a['id'];
+        $a['course'] = [
+            '_id'   => (string) $a['course'],
+            'title' => $a['courseTitle'] ?? ''
+        ];
+    }
+    unset($a);
+
     jsonResponse(['success' => true, 'count' => (int) $count, 'page' => $page, 'limit' => $limit, 'assignments' => $assignments]);
 }
 

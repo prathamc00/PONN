@@ -67,11 +67,16 @@ export default function RegisterPage() {
     }
     try {
       setOtpLoading(true);
-      // Verify OTP first
-      await apiFetch('/otp/verify', {
+      const otpResponse = await apiFetch('/otp/verify', {
         method: 'POST',
         body: JSON.stringify({ email: formData.email, code: otp }),
       });
+
+      const verificationToken = otpResponse?.emailVerificationToken;
+      if (!verificationToken) {
+        throw new Error('Verification proof not received. Please request a new OTP.');
+      }
+
       // OTP verified — now register
       await register({
         name: formData.name,
@@ -82,6 +87,7 @@ export default function RegisterPage() {
         semester: Number(formData.semester),
         phone: formData.phone,
         role: 'student',
+        emailVerificationToken: verificationToken,
       });
       navigate('/dashboard');
     } catch (err: any) {

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
+import { showConfirm } from '../../utils/dialog';
 
 interface Module {
   id?: string;
@@ -113,7 +114,13 @@ export default function ManageCourses() {
   };
 
   const deleteCourse = async (id: string) => {
-    if (!confirm('Delete this course and all its lessons?')) return;
+    const shouldDelete = await showConfirm({
+      title: 'Delete course?',
+      text: 'Delete this course and all its lessons?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
     try {
       await apiFetch(`/courses/${id}`, { method: 'DELETE' });
       await loadCourses();
@@ -190,7 +197,14 @@ export default function ManageCourses() {
   };
 
   const deleteLesson = async (moduleId: string) => {
-    if (!selectedCourse || !confirm('Delete this lesson?')) return;
+    if (!selectedCourse) return;
+    const shouldDelete = await showConfirm({
+      title: 'Delete lesson?',
+      text: 'Delete this lesson?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
     try {
       await apiFetch(`/courses/${selectedCourse._id}/modules/${moduleId}`, { method: 'DELETE' });
       await loadModules(selectedCourse._id);

@@ -4,21 +4,24 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../../utils/api';
+import { showConfirm, showError, showSuccess } from '../../utils/dialog';
 
 interface AssignmentRecord {
+  id?: string | number;
   _id: string;
   title: string;
   description?: string;
   type: string;
-  course: { _id: string; title: string } | string;
+  course: { id?: string | number; _id?: string; title: string } | string;
   dueDate: string;
   maxMarks: number;
   createdAt: string;
 }
 
 interface SubmissionRecord {
+  id?: string | number;
   _id: string;
-  student: { _id: string; name: string; email: string };
+  student: { id?: string | number; _id?: string; name: string; email: string };
   assignment: string;
   type: string;
   filePath?: string;
@@ -30,6 +33,18 @@ interface SubmissionRecord {
 }
 
 export default function ManageAssignments() {
+  const getEntityIdCandidates = (obj: any): string[] => {
+    const raw = [obj?.id, obj?._id]
+      .map((v) => (v == null ? '' : String(v).trim()))
+      .filter((v) => v.length > 0);
+    return Array.from(new Set(raw));
+  };
+
+  const getEntityId = (obj: any): string => getEntityIdCandidates(obj)[0] || '';
+
+  const isRouteNotFoundError = (err: any): boolean =>
+    String(err?.message || '').toLowerCase().includes('route not found');
+
   const [view, setView] = useState<'list' | 'submissions' | 'grading'>('list');
   const [assignments, setAssignments] = useState<AssignmentRecord[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
@@ -68,10 +83,27 @@ export default function ManageAssignments() {
   const handleViewSubmissions = async (a: AssignmentRecord) => {
     setSelectedAssignment(a);
     try {
-      const data = await apiFetch(`/assignments/${a._id}/submissions`);
+      const assignmentIdCandidates = getEntityIdCandidates(a);
+      if (assignmentIdCandidates.length === 0) throw new Error('Assignment ID is missing');
+
+      let data: any = null;
+      let lastErr: any = null;
+      for (const assignmentId of assignmentIdCandidates) {
+        try {
+          data = await apiFetch(`/assignments/${assignmentId}/submissions`);
+          break;
+        } catch (err: any) {
+          lastErr = err;
+          if (!isRouteNotFoundError(err)) throw err;
+        }
+      }
+
+      if (!data) throw lastErr || new Error('Unable to load submissions.');
       setSubmissions(data.submissions || []);
       setView('submissions');
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to load submissions', err.message || 'Unable to load submissions.');
+    }
   };
 
   const handleGradeView = (sub: SubmissionRecord) => {
@@ -84,18 +116,44 @@ export default function ManageAssignments() {
   const submitGrade = async () => {
     if (!selectedSubmission) return;
     try {
-      await apiFetch(`/submissions/${selectedSubmission._id}/grade`, {
-        method: 'PUT',
-        body: JSON.stringify({ grade: Number(grade), feedback }),
-      });
-      alert('Grade submitted!');
+      const submissionIdCandidates = getEntityIdCandidates(selectedSubmission);
+      if (submissionIdCandidates.length === 0) throw new Error('Submission ID is missing');
+
+      let graded = false;
+      let lastErr: any = null;
+      for (const submissionId of submissionIdCandidates) {
+        try {
+          await apiFetch(`/submissions/${submissionId}/grade`, {
+            method: 'PUT',
+            body: JSON.stringify({ grade: Number(grade), feedback }),
+          });
+          graded = true;
+          break;
+        } catch (err: any) {
+          lastErr = err;
+          if (!isRouteNotFoundError(err)) throw err;
+        }
+      }
+      if (!graded) throw lastErr || new Error('Unable to submit grade.');
+
+      await showSuccess('Grade submitted!', 'Student grade has been saved.');
       // Refresh submissions
       if (selectedAssignment) {
-        const data = await apiFetch(`/assignments/${selectedAssignment._id}/submissions`);
-        setSubmissions(data.submissions || []);
+        const assignmentIdCandidates = getEntityIdCandidates(selectedAssignment);
+        for (const assignmentId of assignmentIdCandidates) {
+          try {
+            const data = await apiFetch(`/assignments/${assignmentId}/submissions`);
+            setSubmissions(data.submissions || []);
+            break;
+          } catch (err: any) {
+            if (!isRouteNotFoundError(err)) throw err;
+          }
+        }
       }
       setView('submissions');
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to submit grade', err.message || 'Unable to submit grade.');
+    }
   };
 
   const createAssignment = async () => {
@@ -103,15 +161,39 @@ export default function ManageAssignments() {
       await apiFetch('/assignments', { method: 'POST', body: JSON.stringify(form) });
       setIsCreateOpen(false);
       await loadAssignments();
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to create assignment', err.message || 'Unable to create assignment.');
+    }
   };
 
-  const deleteAssignment = async (id: string) => {
-    if (!confirm('Delete this assignment?')) return;
+  const deleteAssignment = async (assignment: AssignmentRecord) => {
+    const shouldDelete = await showConfirm({
+      title: 'Delete assignment?',
+      text: 'Delete this assignment?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!shouldDelete) return;
     try {
-      await apiFetch(`/assignments/${id}`, { method: 'DELETE' });
+      const idCandidates = getEntityIdCandidates(assignment);
+      if (idCandidates.length === 0) throw new Error('Assignment ID is missing');
+      let deleted = false;
+      let lastErr: any = null;
+      for (const idCandidate of idCandidates) {
+        try {
+          await apiFetch(`/assignments/${idCandidate}`, { method: 'DELETE' });
+          deleted = true;
+          break;
+        } catch (err: any) {
+          lastErr = err;
+          if (!isRouteNotFoundError(err)) throw err;
+        }
+      }
+      if (!deleted) throw lastErr || new Error('Unable to delete assignment.');
       await loadAssignments();
-    } catch (err: any) { alert(err.message); }
+    } catch (err: any) {
+      await showError('Failed to delete assignment', err.message || 'Unable to delete assignment.');
+    }
   };
 
   const filteredAssignments = assignments.filter(a => a.title?.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -137,7 +219,7 @@ export default function ManageAssignments() {
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Assignment Management</h1>
                 <p className="text-slate-500 dark:text-slate-400 font-medium">Create assignments and grade student work.</p>
               </div>
-              <button onClick={() => { setForm({ title: '', description: '', course: courses[0]?._id || '', type: 'file_upload', dueDate: '', maxMarks: 100 }); setIsCreateOpen(true); }}
+              <button onClick={() => { setForm({ title: '', description: '', course: getEntityId(courses[0]), type: 'file_upload', dueDate: '', maxMarks: 100 }); setIsCreateOpen(true); }}
                 className="px-4 py-2.5 bg-brand-600 text-white rounded-2xl text-sm font-bold hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2">
                 <Plus className="w-4 h-4" /> Create Assignment
               </button>
@@ -191,7 +273,7 @@ export default function ManageAssignments() {
                     ) : filteredAssignments.length === 0 ? (
                       <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">No assignments found</td></tr>
                     ) : filteredAssignments.map(a => (
-                      <tr key={a._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                      <tr key={getEntityId(a)} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                         <td className="px-6 py-4">
                           <p className="text-sm font-bold text-slate-900 dark:text-white">{a.title}</p>
                           <p className="text-xs text-slate-400 mt-1">Max: {a.maxMarks} marks</p>
@@ -206,7 +288,7 @@ export default function ManageAssignments() {
                             <button onClick={() => handleViewSubmissions(a)} className="px-4 py-2 bg-brand-50 dark:bg-brand-900/20 text-brand-600 rounded-xl font-bold text-xs hover:bg-brand-600 hover:text-white transition-all flex items-center gap-1">
                               Submissions <ChevronRight className="w-3 h-3" />
                             </button>
-                            <button onClick={() => deleteAssignment(a._id)} className="p-2 bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 rounded-xl hover:bg-rose-100 transition-colors">
+                            <button onClick={() => deleteAssignment(a)} className="p-2 bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 rounded-xl hover:bg-rose-100 transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -245,7 +327,7 @@ export default function ManageAssignments() {
                   {submissions.length === 0 ? (
                     <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-400">No submissions yet</td></tr>
                   ) : submissions.map(sub => (
-                    <tr key={sub._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <tr key={getEntityId(sub)} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{getInitials(sub.student?.name || '?')}</div>
@@ -360,7 +442,7 @@ export default function ManageAssignments() {
                     <select value={form.course} onChange={e => setForm(p => ({ ...p, course: e.target.value }))}
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none text-slate-900 dark:text-white font-medium appearance-none">
                       <option value="">Select Course</option>
-                      {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+                      {courses.map(c => <option key={getEntityId(c)} value={getEntityId(c)}>{c.title}</option>)}
                     </select>
                   </div>
                   <div>

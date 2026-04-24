@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '../../utils/api';
+import { showAlert, showError } from '../../utils/dialog';
 
 interface Submission {
   _id: string;
@@ -60,7 +61,10 @@ export default function GradingQueue() {
 
   const handleGrade = async (submissionId: string) => {
     const grade = Number(gradeInput);
-    if (isNaN(grade)) return alert('Please enter a valid grade');
+    if (isNaN(grade)) {
+      await showAlert({ title: 'Invalid grade', text: 'Please enter a valid grade', icon: 'warning' });
+      return;
+    }
     setSubmitting(true);
     try {
       await apiFetch(`/submissions/${submissionId}/grade`, {
@@ -72,7 +76,7 @@ export default function GradingQueue() {
       setFeedbackInput('');
       await load();
     } catch (err: any) {
-      alert(err.message);
+      await showError('Failed to submit grade', err.message || 'Unable to submit grade.');
     } finally {
       setSubmitting(false);
     }
