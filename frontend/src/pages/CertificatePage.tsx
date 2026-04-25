@@ -220,7 +220,7 @@ function CertificateTemplate({
       </div>
 
       {/* ── CURSIVE TITLE ── */}
-      <div style={{ padding: '6px 62px 0 62px' }}>
+      <div style={{ padding: '6px 62px 0 62px', textAlign: 'center' }}>
         <span style={{
           fontFamily: '"Brush Script MT", "Palatino Linotype", cursive',
           fontSize: 46, color: '#6D28D9', fontWeight: 'normal', fontStyle: 'italic',
@@ -433,9 +433,9 @@ async function buildCertificateDataUrl(
   c.fillText('Date: ' + issueDate, W - 62, 176);
 
   // ── Cursive title ──
-  c.textAlign = 'left'; c.fillStyle = '#6D28D9';
+  c.textAlign = 'center'; c.fillStyle = '#6D28D9';
   c.font = 'italic normal 46px "Brush Script MT", cursive';
-  c.fillText('Certificate of Achievement', 62, 228);
+  c.fillText('Certificate of Achievement', W / 2, 228);
 
   // ── Body text (center-aligned with coloured spans) ──
   const lh = 30;

@@ -91,7 +91,34 @@ function updateInstructorStatus(int $id): void {
 // ── exportUsersCSV ────────────────────────────────────────────────────────────
 function exportUsersCSV(): void {
     $db   = getDb();
-    $stmt = $db->query('SELECT name, email, role, college, branch, semester, phone, approvalStatus, createdAt FROM users ORDER BY createdAt DESC');
+    $stmt = $db->query('
+        SELECT 
+            u.id,
+            u.name, 
+            u.email, 
+            u.role, 
+            u.college, 
+            u.branch, 
+            u.semester, 
+            u.phone, 
+            u.approvalStatus, 
+            u.aadhaarVerified,
+            u.aadhaarCardPath,
+            u.createdAt,
+            (
+                SELECT GROUP_CONCAT(c.title SEPARATOR \'; \')
+                FROM user_courses uc
+                JOIN courses c ON c.id = uc.courseId
+                WHERE uc.userId = u.id
+            ) AS enrolledCourses,
+            (
+                SELECT GROUP_CONCAT(cert.title SEPARATOR \'; \')
+                FROM certificates cert
+                WHERE cert.student = u.id
+            ) AS earnedCertificates
+        FROM users u 
+        ORDER BY u.createdAt DESC
+    ');
     $users = $stmt->fetchAll();
 
     header('Content-Type: text/csv');
@@ -99,18 +126,39 @@ function exportUsersCSV(): void {
     http_response_code(200);
 
     $out = fopen('php://output', 'w');
-    fputcsv($out, ['Name', 'Email', 'Role', 'College', 'Branch', 'Semester', 'Phone', 'Status', 'Joined Date']);
+    fputs($out, "\xEF\xBB\xBF"); // Add UTF-8 BOM for Excel
+    fputcsv($out, [
+        'ID',
+        'Name', 
+        'Email', 
+        'Role', 
+        'College', 
+        'Branch', 
+        'Semester', 
+        'Phone', 
+        'Status', 
+        'Aadhaar Verified',
+        'Aadhaar Path',
+        'Enrolled Courses',
+        'Certificates',
+        'Joined Date'
+    ]);
     foreach ($users as $u) {
         fputcsv($out, [
+            $u['id'] ?? '',
             $u['name'] ?? '',
             $u['email'] ?? '',
             $u['role'] ?? '',
             $u['college'] ?? '',
             $u['branch'] ?? '',
             $u['semester'] ?? '',
-            $u['phone'] ?? '',
+            !empty($u['phone']) ? "\t" . $u['phone'] : '',
             $u['approvalStatus'] ?? '',
-            $u['createdAt'] ? (new DateTime($u['createdAt']))->format('Y-m-d') : '',
+            isset($u['aadhaarVerified']) && $u['aadhaarVerified'] ? 'Yes' : 'No',
+            $u['aadhaarCardPath'] ?? '',
+            $u['enrolledCourses'] ?? '',
+            $u['earnedCertificates'] ?? '',
+            $u['createdAt'] ? "\t" . (new DateTime($u['createdAt']))->format('d-M-Y H:i') : '',
         ]);
     }
     fclose($out);
