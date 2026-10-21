@@ -722,9 +722,11 @@ password_verify($plaintext, $hashed); // Secure constant-time comparison
 
 ```
 Token lifecycle:
-Register/Login → jwtSign({ id, role }, SECRET, '7d') → stored in localStorage
+Register/Login → jwtSign({ id, role }, SECRET, '8h') → stored in localStorage
 Every request → Authorization: Bearer <token> → jwtVerify() on server
-7 days later → token invalid → 401 → force re-login
+8 hours later → token invalid → 401 → force re-login
+
+If passwordChangedAt > token.iat, token is invalidated immediately.
 ```
 
 Never store tokens in cookies without `httpOnly` + `SameSite`. This app uses localStorage which is acceptable for this use case.
@@ -752,7 +754,31 @@ checkRateLimit('global', 300, 15 * 60);
 // OTP specific: 20 sends / 5 min / IP
 checkRateLimit('otp', 20, 5 * 60);
 // Prevents email spam abuse on the register page
+
+// Login specific: 8 attempts / 15 min / email key
+checkRateLimit(buildLoginRateKey($email), 8, 15 * 60);
 ```
+
+### 6. HTTPS + Security Headers
+
+```php
+// index.php bootstrap
+enforceHttpsIfRequired();
+applySecurityHeaders();
+
+// Strict transport + API CSP + browser hardening headers
+```
+
+Production requests are redirected to HTTPS when `ENFORCE_HTTPS=true` and include HSTS on secure connections.
+
+### 7. Security Monitoring
+
+The backend emits structured events to `security_events` (with request ID correlation) for:
+- `auth_login_failed`, `auth_login_blocked`, `auth_login_success`
+- `rate_limit_exceeded`, `api_rate_limited`
+- `api_error`, `api_unhandled_exception`, `api_fatal_error`
+
+If DB logging fails and fallback is enabled, events are appended to `php-backend/logs/security.log`.
 
 ### 5. SQL Injection Prevention
 
@@ -876,6 +902,24 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [L]
 ```
 All API requests go to `index.php` regardless of path.
+
+### Required Production Environment Settings
+
+```env
+APP_ENV=production
+ENFORCE_HTTPS=true
+JWT_SECRET=<64+ random chars>
+EMAIL_VERIFICATION_SECRET=<64+ random chars>
+SECURITY_EVENTS_ENABLED=true
+SECURITY_LOG_FILE_FALLBACK=true
+```
+
+### Database Network Security
+
+For production deployment:
+- Do not expose MySQL publicly.
+- Restrict DB user host/IP to app server network only.
+- Use least-privilege DB credentials dedicated to this app.
 
 ---
 

@@ -2,6 +2,9 @@
 node_modules/
 backend/node_modules/
 frontend/node_modules/
+node-backend/node_modules/
+new- frontend/node_modules/
+main-frontend/node_modules/
 
 # Logs
 *.log
@@ -12,6 +15,14 @@ yarn-error.log*
 # Environment
 .env
 .env.*
+*.env
+node-backend/.env
+new- frontend/.env*
+
+# Databases
+*.sqlite
+*.sqlite-journal
+*.db
 
 # OS / Editor
 .DS_Store
