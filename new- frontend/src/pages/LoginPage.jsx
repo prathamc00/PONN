@@ -41,7 +41,7 @@ export default function LoginPage() {
           </Link>
           <Link
             to="/"
-            className="text-xs font-mono text-slate-500 hover:text-[#07241a] transition-colors"
+            className="text-xs font-mono text-slate-500 hover:text-[#ea580c] transition-colors"
           >
             ← Back Home
           </Link>
@@ -50,7 +50,7 @@ export default function LoginPage() {
         {/* Card */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-7 sm:p-9 shadow-lg">
           <div className="pb-5 mb-6 border-b border-slate-100">
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#07241a] tracking-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               Welcome Back
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -78,7 +78,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:border-[#07241a] focus:ring-2 focus:ring-[#07241a]/10 focus:outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:border-[#ea580c] focus:ring-2 focus:ring-[#ea580c]/15 focus:outline-none transition-all"
                   disabled={isLoading}
                 />
               </div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 <label className="text-xs font-mono uppercase tracking-wider text-slate-600 font-semibold">
                   Password
                 </label>
-                <Link to="/forgot-password" className="text-xs text-[#9d4225] hover:underline font-medium">
+                <Link to="/forgot-password" className="text-xs text-[#ea580c] hover:underline font-medium">
                   Forgot Password?
                 </Link>
               </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:border-[#07241a] focus:ring-2 focus:ring-[#07241a]/10 focus:outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm placeholder:text-slate-400 focus:bg-white focus:border-[#ea580c] focus:ring-2 focus:ring-[#ea580c]/15 focus:outline-none transition-all"
                   disabled={isLoading}
                 />
               </div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              className="w-full py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? 'Signing in...' : (
                 <>
@@ -124,7 +124,7 @@ export default function LoginPage() {
           <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-2.5 text-center text-xs text-slate-500">
             <div>
               Don't have an account yet?{' '}
-              <Link to="/register" className="text-[#9d4225] font-semibold hover:underline">
+              <Link to="/register" className="text-[#ea580c] font-semibold hover:underline">
                 Register as Student
               </Link>
             </div>

@@ -119,7 +119,7 @@ export default function VerifyCertificatePage() {
   }, [certificate]);
 
   return (
-    <div className="min-h-screen bg-[#f7f9f6] text-slate-800 flex flex-col justify-between selection:bg-[#07241a]/15 selection:text-[#07241a]">
+    <div className="min-h-screen bg-[#f7f9f6] text-slate-800 flex flex-col justify-between selection:bg-[#ea580c]/15 selection:text-[#ea580c]">
       {/* ── TOP NAVIGATION BAR ──────────────────────────────────────────────── */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 px-3.5 sm:px-6 md:px-8 py-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
@@ -129,7 +129,7 @@ export default function VerifyCertificatePage() {
               <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-[#9d4225] font-bold block uppercase truncate">
                 Registry Verification
               </span>
-              <span className="text-[11px] sm:text-xs font-semibold text-[#07241a] block truncate">
+              <span className="text-[11px] sm:text-xs font-semibold text-[#ea580c] block truncate">
                 Official Credential Validation
               </span>
             </div>
@@ -139,13 +139,13 @@ export default function VerifyCertificatePage() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link
             to="/login"
-            className="text-[11px] sm:text-xs font-semibold text-[#07241a] hover:text-[#1e3a2f] px-2.5 sm:px-3.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+            className="text-[11px] sm:text-xs font-semibold text-[#ea580c] hover:text-[#c2410c] px-2.5 sm:px-3.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
           >
             Portal Login
           </Link>
           <Link
             to="/courses"
-            className="text-[11px] sm:text-xs font-semibold bg-[#07241a] hover:bg-[#1e3a2f] text-white px-3 sm:px-4 py-1.5 rounded-lg transition-colors shadow-xs"
+            className="text-[11px] sm:text-xs font-semibold bg-[#ea580c] hover:bg-[#c2410c] text-white px-3 sm:px-4 py-1.5 rounded-lg transition-colors shadow-xs"
           >
             Courses
           </Link>
@@ -156,10 +156,10 @@ export default function VerifyCertificatePage() {
       <main className="flex-1 w-full max-w-5xl mx-auto px-3.5 sm:px-6 md:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
         {/* Search header for credential validation */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs text-center space-y-4">
-          <span className="px-3 py-1 bg-[#07241a]/8 text-[#07241a] border border-[#07241a]/15 rounded-full font-mono text-xs font-semibold inline-flex items-center gap-1.5">
-            <ShieldCheck size={14} className="text-[#07241a]" /> Cryptographic Registry Explorer
+          <span className="px-3 py-1 bg-[#ea580c]/8 text-[#ea580c] border border-[#ea580c]/15 rounded-full font-mono text-xs font-semibold inline-flex items-center gap-1.5">
+            <ShieldCheck size={14} className="text-[#ea580c]" /> Cryptographic Registry Explorer
           </span>
-          <h1 className="text-2xl md:text-4xl font-serif font-bold text-[#07241a]">
+          <h1 className="text-2xl md:text-4xl font-serif font-bold text-[#ea580c]">
             Validate Academic Credential
           </h1>
           <p className="text-sm text-slate-600 max-w-xl mx-auto">
@@ -174,12 +174,12 @@ export default function VerifyCertificatePage() {
                 placeholder="Enter Certificate ID (e.g. CRT-844085E1)"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#07241a] focus:bg-white rounded-xl text-xs font-mono text-slate-900 focus:outline-none transition-all uppercase"
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-[#ea580c] focus:bg-white rounded-xl text-xs font-mono text-slate-900 focus:outline-none transition-all uppercase"
               />
             </div>
             <button
               type="submit"
-              className="px-5 py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-xs"
+              className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-xs"
             >
               Verify
             </button>
@@ -189,7 +189,7 @@ export default function VerifyCertificatePage() {
         {/* Dynamic Verification Output */}
         {loading ? (
           <div className="bg-white border border-slate-200 rounded-3xl p-16 text-center space-y-3">
-            <div className="w-8 h-8 border-2 border-[#07241a] border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-8 h-8 border-2 border-[#ea580c] border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="font-mono text-xs text-slate-500">Querying immutable credential ledger...</p>
           </div>
         ) : error ? (
@@ -204,7 +204,7 @@ export default function VerifyCertificatePage() {
             <div className="pt-2">
               <Link
                 to="/"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#07241a] hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#ea580c] hover:underline"
               >
                 <ArrowLeft size={14} /> Return to Homepage
               </Link>
@@ -281,7 +281,7 @@ export default function VerifyCertificatePage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div className="space-y-1">
                   <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Awarded To Candidate</span>
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#07241a]">
+                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#ea580c]">
                     {certificate.student?.name || 'Verified Student'}
                   </h3>
                   <p className="text-xs text-slate-500 font-mono">
@@ -291,7 +291,7 @@ export default function VerifyCertificatePage() {
 
                 <div className="text-right">
                   <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">Certificate ID</span>
-                  <span className="font-mono text-base font-bold text-[#07241a] block">{certificate.certificateId}</span>
+                  <span className="font-mono text-base font-bold text-[#ea580c] block">{certificate.certificateId}</span>
                   <span className="text-[11px] text-slate-400 block mt-0.5">
                     Issued: {new Date(certificate.earnedDate || certificate.createdAt || Date.now()).toLocaleDateString('en-US', {
                       month: 'long',
@@ -326,7 +326,7 @@ export default function VerifyCertificatePage() {
 
                 <div className="p-4 bg-slate-50/70 border border-slate-100 rounded-2xl">
                   <span className="text-xs font-medium text-slate-400 block">Verification Status</span>
-                  <span className="text-sm font-medium text-[#07241a] mt-1 block flex items-center gap-1.5">
+                  <span className="text-sm font-medium text-[#ea580c] mt-1 block flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     Valid & Unrevoked
                   </span>

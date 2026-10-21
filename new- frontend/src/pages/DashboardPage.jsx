@@ -61,7 +61,7 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-[#07241a]/5 text-[#07241a] border border-[#07241a]/15 rounded-full font-mono text-[11px] font-semibold flex items-center gap-1">
+              <span className="px-2.5 py-0.5 bg-[#ea580c]/5 text-[#ea580c] border border-[#ea580c]/15 rounded-full font-mono text-[11px] font-semibold flex items-center gap-1">
                 <Sparkles size={12} className="text-[#9d4225]" /> {todayFormatted}
               </span>
               <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200/60 rounded-full text-[11px] font-medium flex items-center gap-1">
@@ -70,7 +70,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-[#07241a]">
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-[#ea580c]">
               Welcome back, {studentName}
             </h1>
             <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
@@ -83,14 +83,14 @@ export default function DashboardPage() {
             {courses.length > 0 && (
               <Link
                 to={`/courses/${courses[0]._id || courses[0].id}`}
-                className="px-5 py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition-all hover:shadow-sm"
+                className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition-all hover:shadow-sm"
               >
                 <PlayCircle size={15} /> Resume Current Course →
               </Link>
             )}
             <Link
               to="/courses"
-              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#07241a] rounded-xl text-xs font-medium transition-colors"
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#ea580c] rounded-xl text-xs font-medium transition-colors"
             >
               Browse Catalog
             </Link>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <span className="text-slate-400 font-medium block">Active Courses</span>
-            <span className="font-semibold text-[#07241a] mt-0.5 block">
+            <span className="font-semibold text-[#ea580c] mt-0.5 block">
               {courses.length} Enrolled
             </span>
           </div>
@@ -134,15 +134,15 @@ export default function DashboardPage() {
             <span className="text-xs font-medium text-slate-500 uppercase tracking-wider font-mono">
               Enrolled Tracks
             </span>
-            <div className="w-9 h-9 rounded-xl bg-[#07241a]/10 text-[#07241a] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#ea580c]/10 text-[#ea580c] flex items-center justify-center">
               <BookOpen size={18} />
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-bold text-[#07241a]">{courses.length}</div>
+            <div className="text-2xl font-bold text-[#ea580c]">{courses.length}</div>
             <div className="flex items-center justify-between text-xs text-slate-500 mt-1">
               <span>Active Curriculum</span>
-              <Link to="/courses" className="text-[#07241a] hover:text-[#1e3a2f] hover:underline font-semibold">
+              <Link to="/courses" className="text-[#ea580c] hover:text-[#c2410c] hover:underline font-semibold">
                 View all →
               </Link>
             </div>
@@ -160,10 +160,10 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-bold text-[#07241a]">{assignments.length}</div>
+            <div className="text-2xl font-bold text-[#ea580c]">{assignments.length}</div>
             <div className="flex items-center justify-between text-xs text-slate-500 mt-1">
               <span>Pending Tasks</span>
-              <Link to="/assignments" className="text-[#07241a] hover:text-[#1e3a2f] hover:underline font-semibold">
+              <Link to="/assignments" className="text-[#ea580c] hover:text-[#c2410c] hover:underline font-semibold">
                 Upload work →
               </Link>
             </div>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-bold text-[#07241a]">{tests.length}</div>
+            <div className="text-2xl font-bold text-[#ea580c]">{tests.length}</div>
             <div className="flex items-center justify-between text-xs text-slate-500 mt-1">
               <span>Ready for Testing</span>
               <Link to="/test" className="text-[#9d4225] hover:underline font-semibold">
@@ -221,12 +221,12 @@ export default function DashboardPage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-[#07241a]">Current Coursework</h2>
+                <h2 className="text-lg font-bold text-[#ea580c]">Current Coursework</h2>
                 <p className="text-xs text-slate-500">Pick up where you left off in your enrolled curricula.</p>
               </div>
               <Link
                 to="/courses"
-                className="text-xs font-semibold text-[#07241a] hover:text-[#1e3a2f] flex items-center gap-1"
+                className="text-xs font-semibold text-[#ea580c] hover:text-[#c2410c] flex items-center gap-1"
               >
                 Browse All <ChevronRight size={14} />
               </Link>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                             </span>
                           </div>
 
-                          <h3 className="text-xl font-bold text-[#07241a] leading-snug">
+                          <h3 className="text-xl font-bold text-[#ea580c] leading-snug">
                             {course.title}
                           </h3>
                           <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
@@ -276,10 +276,10 @@ export default function DashboardPage() {
                       <div className="space-y-1.5 pt-2 border-t border-slate-100">
                         <div className="flex items-center justify-between text-xs text-slate-500">
                           <span>Progress</span>
-                          <span className="font-semibold text-[#07241a] font-mono">Active</span>
+                          <span className="font-semibold text-[#ea580c] font-mono">Active</span>
                         </div>
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#07241a] rounded-full w-2/5" />
+                          <div className="h-full bg-[#ea580c] rounded-full w-2/5" />
                         </div>
                       </div>
 
@@ -287,13 +287,13 @@ export default function DashboardPage() {
                       <div className="pt-2 flex items-center justify-between">
                         <Link
                           to={`/courses/${cId}`}
-                          className="px-4 py-2 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
+                          className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
                         >
                           <PlayCircle size={14} /> Resume Lessons →
                         </Link>
                         <Link
                           to={`/courses/${cId}`}
-                          className="text-xs text-slate-500 hover:text-[#07241a] font-medium"
+                          className="text-xs text-slate-500 hover:text-[#ea580c] font-medium"
                         >
                           View Full Syllabus
                         </Link>
@@ -305,13 +305,13 @@ export default function DashboardPage() {
             ) : (
               <div className="p-12 text-center space-y-3 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <BookOpen size={32} className="text-slate-300 mx-auto" />
-                <h3 className="text-base font-bold text-[#07241a]">No Enrolled Courses</h3>
+                <h3 className="text-base font-bold text-[#ea580c]">No Enrolled Courses</h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
                   Browse the academic course catalog to enroll in digital skill tracks.
                 </p>
                 <Link
                   to="/courses"
-                  className="mt-3 inline-block px-4 py-2 bg-[#07241a] text-white rounded-xl text-xs font-semibold"
+                  className="mt-3 inline-block px-4 py-2 bg-[#ea580c] text-white rounded-xl text-xs font-semibold"
                 >
                   Browse Course Catalog
                 </Link>
@@ -323,12 +323,12 @@ export default function DashboardPage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-[#07241a]">Proctored Examinations</h2>
+                <h2 className="text-lg font-bold text-[#ea580c]">Proctored Examinations</h2>
                 <p className="text-xs text-slate-500">Validate competencies and unlock verified degree credentials.</p>
               </div>
               <Link
                 to="/test"
-                className="text-xs font-semibold text-[#07241a] hover:text-[#1e3a2f] flex items-center gap-1"
+                className="text-xs font-semibold text-[#ea580c] hover:text-[#c2410c] flex items-center gap-1"
               >
                 All Exams <ChevronRight size={14} />
               </Link>
@@ -350,7 +350,7 @@ export default function DashboardPage() {
                           </span>
                           <span className="text-emerald-700 font-semibold font-mono">Pass: 40%</span>
                         </div>
-                        <h4 className="text-base font-bold text-[#07241a] mt-2.5">
+                        <h4 className="text-base font-bold text-[#ea580c] mt-2.5">
                           {test.title}
                         </h4>
                         <p className="text-xs text-slate-500 mt-1 line-clamp-2">
@@ -361,7 +361,7 @@ export default function DashboardPage() {
                       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                         <Link
                           to={`/test/take/${tId}`}
-                          className="w-full py-2 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                          className="w-full py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
                         >
                           <ClipboardCheck size={14} /> Start Exam Session →
                         </Link>
@@ -385,9 +385,9 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <FileText size={16} className="text-[#9d4225]" />
-                <h3 className="font-bold text-sm text-[#07241a]">Assignments & Due Dates</h3>
+                <h3 className="font-bold text-sm text-[#ea580c]">Assignments & Due Dates</h3>
               </div>
-              <Link to="/assignments" className="text-xs text-[#07241a] hover:underline font-semibold">
+              <Link to="/assignments" className="text-xs text-[#ea580c] hover:underline font-semibold">
                 View All
               </Link>
             </div>
@@ -407,7 +407,7 @@ export default function DashboardPage() {
                     </div>
                     <Link
                       to={`/assignments/upload?assignmentId=${asg._id || asg.id}`}
-                      className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-[#07241a] rounded-lg text-[11px] font-semibold shrink-0 shadow-2xs"
+                      className="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-[#ea580c] rounded-lg text-[11px] font-semibold shrink-0 shadow-2xs"
                     >
                       Submit
                     </Link>
@@ -424,9 +424,9 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <Award size={16} className="text-emerald-700" />
-                <h3 className="font-bold text-sm text-[#07241a]">Verified Credentials</h3>
+                <h3 className="font-bold text-sm text-[#ea580c]">Verified Credentials</h3>
               </div>
-              <Link to="/certificate" className="text-xs text-[#07241a] hover:underline font-semibold">
+              <Link to="/certificate" className="text-xs text-[#ea580c] hover:underline font-semibold">
                 Vault
               </Link>
             </div>
@@ -448,7 +448,7 @@ export default function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <h4 className="font-semibold text-xs text-[#07241a]">
+                    <h4 className="font-semibold text-xs text-[#ea580c]">
                       {cert.title || cert.courseTitle || 'Certificate of Completion'}
                     </h4>
                     <div className="flex items-center justify-between pt-1 text-[11px]">
@@ -473,7 +473,7 @@ export default function DashboardPage() {
 
           {/* Academic Resource Shortcuts */}
           <div className="bg-slate-100/80 border border-slate-200/80 rounded-2xl p-5 space-y-3">
-            <h4 className="text-xs font-bold text-[#07241a] uppercase tracking-wider font-mono">
+            <h4 className="text-xs font-bold text-[#ea580c] uppercase tracking-wider font-mono">
               Academic Support
             </h4>
             <div className="space-y-1.5 text-xs">

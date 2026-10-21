@@ -273,10 +273,10 @@ export default function ChatbotWidget() {
             setIsMinimized(false);
           }}
           aria-label="Open Assistant"
-          className="fixed bottom-5 right-5 z-50 flex items-center justify-center w-11 h-11 bg-[#07241a] hover:bg-[#123629] text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
+          className="fixed bottom-5 right-5 z-50 flex items-center justify-center w-11 h-11 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
         >
           <MessageSquare size={18} className="text-white" />
-          <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+          <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-400 border-2 border-white rounded-full"></span>
         </button>
       )}
 
@@ -288,9 +288,9 @@ export default function ChatbotWidget() {
           }`}
         >
           {/* Minimalist Header */}
-          <div className="bg-[#07241a] px-3.5 py-2.5 text-white flex items-center justify-between select-none">
+          <div className="bg-[#ea580c] px-3.5 py-2.5 text-white flex items-center justify-between select-none">
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
               <span className="text-xs font-semibold tracking-tight text-white font-serif">CRISMATECH Assistant</span>
             </div>
 
@@ -337,7 +337,7 @@ export default function ChatbotWidget() {
                       <div
                         className={`relative max-w-[88%] p-2.5 rounded-xl text-xs leading-relaxed ${
                           isUser
-                            ? 'bg-[#07241a] text-white rounded-tr-none'
+                            ? 'bg-[#ea580c] text-white rounded-tr-none'
                             : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-2xs'
                         }`}
                       >
@@ -357,8 +357,8 @@ export default function ChatbotWidget() {
                             >
                               {copiedIndex === index ? (
                                 <>
-                                  <Check size={10} className="text-emerald-600" />
-                                  <span className="text-emerald-600">Copied</span>
+                                  <Check size={10} className="text-orange-600" />
+                                  <span className="text-orange-600">Copied</span>
                                 </>
                               ) : (
                                 <>
@@ -378,7 +378,7 @@ export default function ChatbotWidget() {
                             <button
                               key={sIdx}
                               onClick={() => handleSendMessage(suggestion)}
-                              className="text-[10px] text-slate-600 hover:text-[#07241a] bg-white hover:bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 text-left transition-colors font-mono"
+                              className="text-[10px] text-slate-600 hover:text-[#ea580c] bg-white hover:bg-orange-50/50 border border-slate-200 hover:border-orange-200 rounded-full px-2 py-0.5 text-left transition-colors font-mono"
                             >
                               {suggestion} →
                             </button>
@@ -392,9 +392,9 @@ export default function ChatbotWidget() {
                 {/* Loading Indicator */}
                 {loading && (
                   <div className="flex items-center gap-1.5 text-slate-400 text-xs font-mono bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 max-w-[90px]">
-                    <div className="w-1.5 h-1.5 bg-[#07241a] rounded-full animate-pulse"></div>
-                    <div className="w-1.5 h-1.5 bg-[#07241a] rounded-full animate-pulse [animation-delay:0.2s]"></div>
-                    <div className="w-1.5 h-1.5 bg-[#07241a] rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                    <div className="w-1.5 h-1.5 bg-[#ea580c] rounded-full animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-[#ea580c] rounded-full animate-pulse [animation-delay:0.2s]"></div>
+                    <div className="w-1.5 h-1.5 bg-[#ea580c] rounded-full animate-pulse [animation-delay:0.4s]"></div>
                   </div>
                 )}
 
@@ -418,12 +418,12 @@ export default function ChatbotWidget() {
                     onKeyDown={handleKeyDown}
                     placeholder="Ask a question..."
                     disabled={loading}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#07241a] focus:bg-white transition-colors"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#ea580c] focus:bg-white transition-colors"
                   />
                   <button
                     type="submit"
                     disabled={!inputMessage.trim() || loading}
-                    className="h-7 w-7 flex items-center justify-center bg-[#07241a] hover:bg-[#123629] disabled:opacity-40 text-white rounded-md transition-colors shrink-0"
+                    className="h-7 w-7 flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] disabled:opacity-40 text-white rounded-md transition-colors shrink-0"
                     aria-label="Send"
                   >
                     <Send size={12} />

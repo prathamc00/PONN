@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -14,10 +14,10 @@ createRoot(document.getElementById('root')).render(
           position="top-right"
           toastOptions={{
             style: {
-              background: '#1e3a2f',
+              background: '#c2410c',
               color: '#fff',
               borderRadius: '0.5rem',
-              border: '1px solid #07241a',
+              border: '1px solid #9a3412',
               fontFamily: 'Inter, sans-serif',
             },
           }}

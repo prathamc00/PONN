@@ -210,7 +210,7 @@ export default function CourseDetailPage() {
               <div className="space-y-4">
                 <div>
                   <span className="font-mono text-xs uppercase text-slate-400 block font-semibold">Course Enrollment</span>
-                  <span className="text-sm font-bold text-[#07241a] mt-1 block">Ready to Start Learning</span>
+                  <span className="text-sm font-bold text-[#ea580c] mt-1 block">Ready to Start Learning</span>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Enroll now to unlock video lectures, download laboratory assets, and earn your verified certificate.
                   </p>
@@ -218,7 +218,7 @@ export default function CourseDetailPage() {
                 <button
                   onClick={handleEnroll}
                   disabled={enrolling}
-                  className="w-full py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   <BookOpen size={14} />
                   <span>{enrolling ? 'Enrolling...' : 'Enroll in this Course'}</span>
@@ -289,7 +289,7 @@ export default function CourseDetailPage() {
               {/* Smart Video Watch Progress Bar */}
               <div className="bg-slate-100 border-b border-slate-200 px-6 py-2.5 flex items-center justify-between text-[11px] font-mono">
                 <div className="flex items-center gap-2 text-slate-600">
-                  <Clock size={13} className="text-[#07241a]" />
+                  <Clock size={13} className="text-[#ea580c]" />
                   <span>Playback Completion: <strong>{videoProgress}%</strong></span>
                   <span className="text-slate-400">• (85% required for auto-verification)</span>
                 </div>
@@ -336,7 +336,7 @@ export default function CourseDetailPage() {
                     onClick={() => setActiveTab('overview')}
                     className={`pb-3 text-xs font-semibold uppercase tracking-wider font-mono border-b-2 transition-all cursor-pointer ${
                       activeTab === 'overview'
-                        ? 'border-[#07241a] text-[#07241a]'
+                        ? 'border-[#ea580c] text-[#ea580c]'
                         : 'border-transparent text-slate-400 hover:text-slate-700'
                     }`}
                   >
@@ -346,7 +346,7 @@ export default function CourseDetailPage() {
                     onClick={() => setActiveTab('notes')}
                     className={`pb-3 text-xs font-semibold uppercase tracking-wider font-mono border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
                       activeTab === 'notes'
-                        ? 'border-[#07241a] text-[#07241a]'
+                        ? 'border-[#ea580c] text-[#ea580c]'
                         : 'border-transparent text-slate-400 hover:text-slate-700'
                     }`}
                   >
@@ -357,7 +357,7 @@ export default function CourseDetailPage() {
                     onClick={() => setActiveTab('qa')}
                     className={`pb-3 text-xs font-semibold uppercase tracking-wider font-mono border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
                       activeTab === 'qa'
-                        ? 'border-[#07241a] text-[#07241a]'
+                        ? 'border-[#ea580c] text-[#ea580c]'
                         : 'border-transparent text-slate-400 hover:text-slate-700'
                     }`}
                   >
@@ -396,13 +396,13 @@ export default function CourseDetailPage() {
                                 <span className="text-[10px] text-slate-400 block font-mono">PDF Document</span>
                               </div>
                             </div>
-                            <Download size={14} className="text-slate-400 group-hover:text-[#07241a]" />
+                            <Download size={14} className="text-slate-400 group-hover:text-[#ea580c]" />
                           </a>
                         ) : null}
 
                         <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-[#07241a]/10 text-[#07241a] flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-[#ea580c]/10 text-[#ea580c] flex items-center justify-center">
                               <Code size={16} />
                             </div>
                             <div>
@@ -431,11 +431,11 @@ export default function CourseDetailPage() {
                           placeholder="Type personal study note or formula..."
                           value={newNoteText}
                           onChange={(e) => setNewNoteText(e.target.value)}
-                          className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#07241a] transition-all"
+                          className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#ea580c] transition-all"
                         />
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-[#07241a] hover:bg-[#1e3a2f] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                          className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                         >
                           <Bookmark size={13} /> Save Note
                         </button>
@@ -457,7 +457,7 @@ export default function CourseDetailPage() {
                             <div className="flex items-start gap-3">
                               <button
                                 onClick={() => handleSeekTo(note.timestampSeconds)}
-                                className="px-2 py-0.5 bg-[#07241a]/10 hover:bg-[#07241a]/20 text-[#07241a] font-mono text-[11px] font-bold rounded cursor-pointer transition-colors"
+                                className="px-2 py-0.5 bg-[#ea580c]/10 hover:bg-[#ea580c]/20 text-[#ea580c] font-mono text-[11px] font-bold rounded cursor-pointer transition-colors"
                                 title="Click to jump video to this moment"
                               >
                                 {note.timestamp}
@@ -491,11 +491,11 @@ export default function CourseDetailPage() {
                           placeholder="Have a doubt about this lecture? Ask the instructor..."
                           value={newQuestionText}
                           onChange={(e) => setNewQuestionText(e.target.value)}
-                          className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#07241a] transition-all"
+                          className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#ea580c] transition-all"
                         />
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-[#07241a] hover:bg-[#1e3a2f] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                          className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                         >
                           <Send size={13} /> Post Doubt
                         </button>

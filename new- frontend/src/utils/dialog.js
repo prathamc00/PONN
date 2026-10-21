@@ -6,7 +6,7 @@ export function showError(title, text) {
     text,
     icon: 'error',
     confirmButtonText: 'OK',
-    confirmButtonColor: '#1e3a2f',
+    confirmButtonColor: '#ea580c',
     background: '#fff8f5',
     color: '#1e1b19',
   });
@@ -18,7 +18,7 @@ export function showSuccess(title, text) {
     text,
     icon: 'success',
     confirmButtonText: 'OK',
-    confirmButtonColor: '#1e3a2f',
+    confirmButtonColor: '#ea580c',
     background: '#fff8f5',
     color: '#1e1b19',
   });
@@ -30,7 +30,7 @@ export function showAlert({ title, text, icon = 'info' }) {
     text,
     icon,
     confirmButtonText: 'OK',
-    confirmButtonColor: '#1e3a2f',
+    confirmButtonColor: '#ea580c',
     background: '#fff8f5',
     color: '#1e1b19',
   });
@@ -44,7 +44,7 @@ export function showConfirm({ title, text, confirmText = 'Confirm', cancelText =
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText,
-    confirmButtonColor: '#1e3a2f',
+    confirmButtonColor: '#ea580c',
     cancelButtonColor: '#9d4225',
     background: '#fff8f5',
     color: '#1e1b19',
@@ -57,7 +57,7 @@ export function showAlreadyAttemptedQuizAlert() {
     text: 'You have already attempted this quiz. Check your results.',
     icon: 'info',
     confirmButtonText: 'OK',
-    confirmButtonColor: '#1e3a2f',
+    confirmButtonColor: '#ea580c',
     background: '#fff8f5',
     color: '#1e1b19',
   });

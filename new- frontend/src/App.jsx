@@ -86,7 +86,7 @@ function CoursesCatalogPage() {
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold text-[#07241a] mt-3">{course.title}</h3>
+                  <h3 className="text-xl font-bold text-[#ea580c] mt-3">{course.title}</h3>
                   <p className="text-xs text-slate-500 line-clamp-3 mt-2 leading-relaxed">
                     {course.description || 'Comprehensive technology curriculum.'}
                   </p>
@@ -103,7 +103,7 @@ function CoursesCatalogPage() {
                     className={`px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs ${
                       course.isEnrolled
                         ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
-                        : 'bg-[#07241a] hover:bg-[#1e3a2f] text-white'
+                        : 'bg-[#ea580c] hover:bg-[#c2410c] text-white'
                     }`}
                   >
                     {course.isEnrolled ? 'Resume Lessons →' : 'Enroll / View Curriculum →'}

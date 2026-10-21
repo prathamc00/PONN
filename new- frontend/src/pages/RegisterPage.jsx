@@ -167,7 +167,7 @@ export default function RegisterPage() {
           </Link>
           <Link
             to="/login"
-            className="text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-[#07241a] transition-colors flex items-center gap-1.5"
+            className="text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-[#ea580c] transition-colors flex items-center gap-1.5"
           >
             Sign In Instead <ArrowRight size={14} />
           </Link>

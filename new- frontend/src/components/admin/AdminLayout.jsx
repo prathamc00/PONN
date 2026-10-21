@@ -117,17 +117,17 @@ export default function AdminLayout() {
                         onClick={() => setSidebarOpen(false)}
                         className={`relative flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all group ${
                           active
-                            ? 'bg-[#07241a]/8 text-[#07241a] font-semibold'
-                            : 'text-slate-600 hover:text-[#07241a] hover:bg-slate-100/70 font-medium'
+                            ? 'bg-[#ea580c]/10 text-[#ea580c] font-semibold'
+                            : 'text-slate-600 hover:text-[#ea580c] hover:bg-orange-50/50 font-medium'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           {active && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#07241a]" />
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#ea580c]" />
                           )}
                           <item.icon
                             size={17}
-                            className={active ? 'text-[#07241a]' : 'text-slate-400 group-hover:text-[#07241a]'}
+                            className={active ? 'text-[#ea580c]' : 'text-slate-400 group-hover:text-[#ea580c]'}
                           />
                           <span>{item.label}</span>
                         </div>

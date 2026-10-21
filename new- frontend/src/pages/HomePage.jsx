@@ -16,7 +16,7 @@ export default function HomePage() {
   const cleanBase = base.endsWith('/') ? base : `${base}/`;
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#07241a] selection:text-white">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-[#ea580c] selection:text-white">
 
       {/* Main Header / Navigation */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
@@ -28,20 +28,20 @@ export default function HomePage() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-sm font-semibold text-[#07241a] hover:text-[#9d4225] transition-colors">
+            <Link to="/" className="text-sm font-semibold text-[#ea580c] hover:text-[#9d4225] transition-colors">
               Home
             </Link>
             {user ? (
-              <Link to="/courses" className="text-sm font-medium text-slate-600 hover:text-[#07241a] transition-colors">
+              <Link to="/courses" className="text-sm font-medium text-slate-600 hover:text-[#ea580c] transition-colors">
                 My Courses
               </Link>
             ) : (
-              <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-[#07241a] transition-colors flex items-center gap-1">
+              <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-[#ea580c] transition-colors flex items-center gap-1">
                 <span>Courses</span>
                 <Lock size={12} className="text-slate-400" />
               </Link>
             )}
-            <Link to="/verify" className="text-sm font-medium text-slate-600 hover:text-[#07241a] transition-colors">
+            <Link to="/verify" className="text-sm font-medium text-slate-600 hover:text-[#ea580c] transition-colors">
               Verify Certificate
             </Link>
           </nav>
@@ -51,7 +51,7 @@ export default function HomePage() {
             {user ? (
               <Link
                 to={user.role === 'admin' || user.role === 'instructor' ? '/admin/dashboard' : '/dashboard'}
-                className="px-5 py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-sm font-semibold transition-all shadow-xs flex items-center gap-2"
+                className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-sm font-semibold transition-all shadow-xs flex items-center gap-2"
               >
                 <span>Go to Dashboard</span>
                 <ArrowRight size={15} />
@@ -60,13 +60,13 @@ export default function HomePage() {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-[#07241a] transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-[#ea580c] transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-sm font-semibold transition-all shadow-xs hover:shadow-md"
+                  className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-sm font-semibold transition-all shadow-xs hover:shadow-md"
                 >
                   Register
                 </Link>
@@ -78,7 +78,7 @@ export default function HomePage() {
           <div className="md:hidden flex items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-700 hover:text-[#07241a] rounded-lg"
+              className="p-2 text-slate-700 hover:text-[#ea580c] rounded-lg"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -92,7 +92,7 @@ export default function HomePage() {
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 text-base font-semibold text-[#07241a] rounded-lg hover:bg-slate-50"
+              className="block px-3 py-2 text-base font-semibold text-[#ea580c] rounded-lg hover:bg-slate-50"
             >
               Home
             </Link>
@@ -125,7 +125,7 @@ export default function HomePage() {
                 <Link
                   to={user.role === 'admin' || user.role === 'instructor' ? '/admin/dashboard' : '/dashboard'}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-3 bg-[#07241a] text-white font-semibold rounded-xl text-sm"
+                  className="w-full text-center py-3 bg-[#ea580c] text-white font-semibold rounded-xl text-sm"
                 >
                   Go to Dashboard
                 </Link>
@@ -141,7 +141,7 @@ export default function HomePage() {
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-center py-2.5 bg-[#07241a] text-white font-semibold rounded-xl text-sm"
+                    className="w-full text-center py-2.5 bg-[#ea580c] text-white font-semibold rounded-xl text-sm"
                   >
                     Register
                   </Link>
@@ -159,7 +159,7 @@ export default function HomePage() {
             {/* Left Column: Headlines & CTA */}
             <div className="lg:col-span-7 xl:col-span-7 space-y-6">
               {/* Main Headline */}
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-[#07241a] font-normal tracking-tight leading-[1.12]">
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-[#ea580c] font-normal tracking-tight leading-[1.12]">
                 Master Practical Technical Skills for <span className="italic font-normal text-[#9d4225]">Real-World</span> Careers.
               </h1>
 
@@ -173,7 +173,7 @@ export default function HomePage() {
                 {user ? (
                   <Link
                     to={user.role === 'admin' || user.role === 'instructor' ? '/admin/dashboard' : '/dashboard'}
-                    className="px-7 py-3.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="px-7 py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                   >
                     <span>Open Student Dashboard</span>
                     <ArrowRight size={18} />
@@ -182,7 +182,7 @@ export default function HomePage() {
                   <>
                     <Link
                       to="/login"
-                      className="px-7 py-3.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                      className="px-7 py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
                       <UserCheck size={18} />
                       <span>Student Sign In</span>
@@ -268,7 +268,7 @@ export default function HomePage() {
                   {user ? (
                     <Link
                       to="/courses"
-                      className="w-full py-3 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
                     >
                       <span>Access Enrolled Courses</span>
                       <ArrowRight size={14} />
@@ -276,7 +276,7 @@ export default function HomePage() {
                   ) : (
                     <Link
                       to="/login"
-                      className="w-full py-3 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"
                     >
                       <Lock size={13} />
                       <span>Sign In to Access Courses</span>
@@ -300,7 +300,7 @@ export default function HomePage() {
                 <Code2 size={13} className="text-[#9d4225]" />
                 Academic Specializations
               </span>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#07241a] font-normal tracking-tight mt-2">
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#ea580c] font-normal tracking-tight mt-2">
                 Technical Tracks & Core Curricula
               </h2>
               <p className="text-sm text-slate-600 mt-1 max-w-2xl">
@@ -311,7 +311,7 @@ export default function HomePage() {
               {user ? (
                 <Link
                   to="/courses"
-                  className="px-5 py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-all shadow-xs"
+                  className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-all shadow-xs"
                 >
                   <span>Open Full Catalogue</span>
                   <ArrowRight size={14} />
@@ -319,7 +319,7 @@ export default function HomePage() {
               ) : (
                 <Link
                   to="/login"
-                  className="px-5 py-2.5 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-all shadow-xs"
+                  className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-2 transition-all shadow-xs"
                 >
                   <Lock size={13} />
                   <span>Sign In for Full Syllabi</span>
@@ -513,7 +513,7 @@ export default function HomePage() {
               <GraduationCap size={14} className="text-emerald-600" />
               Academic Workflow
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#07241a] font-normal tracking-tight mt-2">
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#ea580c] font-normal tracking-tight mt-2">
               How Students Complete & Earn Verifiable Credentials
             </h2>
             <p className="text-sm text-slate-600 mt-1">
@@ -525,7 +525,7 @@ export default function HomePage() {
             {/* Step 1 */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-full bg-[#07241a] text-white flex items-center justify-center font-mono font-bold text-xs">
+                <span className="w-8 h-8 rounded-full bg-[#ea580c] text-white flex items-center justify-center font-mono font-bold text-xs">
                   01
                 </span>
                 <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">Phase 1</span>
@@ -545,7 +545,7 @@ export default function HomePage() {
             {/* Step 2 */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-full bg-[#07241a] text-white flex items-center justify-center font-mono font-bold text-xs">
+                <span className="w-8 h-8 rounded-full bg-[#ea580c] text-white flex items-center justify-center font-mono font-bold text-xs">
                   02
                 </span>
                 <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">Phase 2</span>
@@ -565,7 +565,7 @@ export default function HomePage() {
             {/* Step 3 */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-full bg-[#07241a] text-white flex items-center justify-center font-mono font-bold text-xs">
+                <span className="w-8 h-8 rounded-full bg-[#ea580c] text-white flex items-center justify-center font-mono font-bold text-xs">
                   03
                 </span>
                 <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">Phase 3</span>
@@ -732,10 +732,10 @@ export default function HomePage() {
               Student Navigation
             </h4>
             <ul className="space-y-2 text-xs font-medium text-slate-600">
-              <li><Link to="/login" className="hover:text-[#07241a] transition-colors">Student Login</Link></li>
-              <li><Link to="/register" className="hover:text-[#07241a] transition-colors">Create Student Account</Link></li>
-              <li><Link to="/forgot-password" className="hover:text-[#07241a] transition-colors">Reset Password</Link></li>
-              <li><Link to="/verify" className="hover:text-[#07241a] transition-colors">Verify Certificate</Link></li>
+              <li><Link to="/login" className="hover:text-[#ea580c] transition-colors">Student Login</Link></li>
+              <li><Link to="/register" className="hover:text-[#ea580c] transition-colors">Create Student Account</Link></li>
+              <li><Link to="/forgot-password" className="hover:text-[#ea580c] transition-colors">Reset Password</Link></li>
+              <li><Link to="/verify" className="hover:text-[#ea580c] transition-colors">Verify Certificate</Link></li>
             </ul>
           </div>
 

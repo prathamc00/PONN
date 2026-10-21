@@ -224,7 +224,7 @@ export default function ManageUsers() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setShowBulkModal(true)}
-            className="px-3.5 py-2 bg-[#07241a]/10 hover:bg-[#07241a]/15 text-[#07241a] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-[#07241a]/20 shadow-2xs"
+            className="px-3.5 py-2 bg-[#ea580c]/10 hover:bg-[#ea580c]/15 text-[#ea580c] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-[#ea580c]/20 shadow-2xs"
           >
             <Upload size={14} /> Bulk Onboard Students
           </button>
@@ -493,11 +493,11 @@ export default function ManageUsers() {
           <div className="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 md:p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#07241a]/10 text-[#07241a] flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-[#ea580c]/10 text-[#ea580c] flex items-center justify-center">
                   <Upload size={18} />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-lg text-[#07241a]">Bulk Onboard Students</h3>
+                  <h3 className="font-serif font-bold text-lg text-[#ea580c]">Bulk Onboard Students</h3>
                   <p className="text-xs text-slate-500">Create multiple student accounts and enroll them in batch.</p>
                 </div>
               </div>
@@ -518,7 +518,7 @@ export default function ManageUsers() {
                 <select
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:border-[#07241a]"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:border-[#ea580c]"
                 >
                   <option value="">No Course (Account Creation Only)</option>
                   {courses.map((c) => (
@@ -534,12 +534,12 @@ export default function ManageUsers() {
                 <label className="block font-mono uppercase text-slate-400 text-[10px] font-semibold mb-1.5">
                   Upload CSV Spreadsheet
                 </label>
-                <div className="p-4 border-2 border-dashed border-slate-200 hover:border-[#07241a]/40 rounded-2xl text-center bg-slate-50/60 transition-colors">
+                <div className="p-4 border-2 border-dashed border-slate-200 hover:border-[#ea580c]/40 rounded-2xl text-center bg-slate-50/60 transition-colors">
                   <input
                     type="file"
                     accept=".csv,.txt"
                     onChange={handleFileUpload}
-                    className="block w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#07241a] file:text-white hover:file:bg-[#1e3a2f] cursor-pointer"
+                    className="block w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#ea580c] file:text-white hover:file:bg-[#c2410c] cursor-pointer"
                   />
                   <span className="text-[10px] text-slate-400 block mt-2 font-mono">
                     Accepts .csv format: Name, Email, College, Branch, Phone
@@ -560,7 +560,7 @@ export default function ManageUsers() {
                   value={bulkCsvText}
                   onChange={(e) => setBulkCsvText(e.target.value)}
                   placeholder={`Rahul Verma, rahul@gmail.com, IIT Delhi, Computer Science, 9876543210\nSneha Patel, sneha@gmail.com, BITS Pilani, AI & Machine Learning, 9876543211`}
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-[#07241a] transition-all"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:bg-white focus:outline-none focus:border-[#ea580c] transition-all"
                 />
               </div>
 
@@ -579,7 +579,7 @@ export default function ManageUsers() {
                 <button
                   type="submit"
                   disabled={bulkLoading}
-                  className="px-5 py-2 bg-[#07241a] hover:bg-[#1e3a2f] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                  className="px-5 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {bulkLoading ? 'Processing Batch...' : 'Import & Enroll Batch →'}
                 </button>

@@ -78,7 +78,7 @@ export default function TestResultPage() {
           particleCount: 90,
           spread: 75,
           origin: { y: 0.6 },
-          colors: ['#1e3a2f', '#c25e3e', '#5a7180', '#059669', '#d97706'],
+          colors: ['#c2410c', '#c25e3e', '#5a7180', '#059669', '#d97706'],
         });
       } catch (e) {
         console.warn('Confetti trigger error:', e);

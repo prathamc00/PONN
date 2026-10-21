@@ -5,27 +5,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        // CRISMATECH Default Brand Theme (Forest & Ochre)
-        primary: '#07241a', // Deep Forest Green
-        'primary-container': '#1e3a2f', // Forest Green
+        // CRISMATECH Brand Theme (Orange & Terracotta)
+        primary: '#ea580c', // Crismatech Vibrant Orange
+        'primary-container': '#c2410c', // Deep Rich Orange
         'on-primary': '#ffffff',
-        'on-primary-container': '#caeada',
-        'primary-fixed': '#caeada',
-        'primary-fixed-dim': '#aecebe',
+        'on-primary-container': '#ffedd5',
+        'primary-fixed': '#ffedd5',
+        'primary-fixed-dim': '#fed7aa',
 
         secondary: '#9d4225', // Ochre / Terracotta
         'secondary-container': '#c25e3e',
         'on-secondary': '#ffffff',
         'on-secondary-container': '#ffdbd0',
 
-        accent: '#059669', // Emerald
-        'accent-container': '#10b981',
+        accent: '#f97316', // Bright Orange Accent
+        'accent-container': '#ea580c',
         'on-accent': '#ffffff',
 
-        background: '#f8fafc',
+        background: '#fffbf9',
         surface: '#ffffff',
-        'on-surface': '#07241a',
-        'on-surface-variant': '#424844',
+        'on-surface': '#1c1917',
+        'on-surface-variant': '#57534e',
 
         'surface-dim': '#f1f5f9',
         'surface-bright': '#ffffff',
@@ -36,7 +36,7 @@ export default {
         'surface-container-highest': '#cbd5e1',
         'surface-variant': '#f8fafc',
 
-        'on-background': '#07241a',
+        'on-background': '#1c1917',
         outline: '#727974',
         'outline-variant': '#e2e8f0',
 
