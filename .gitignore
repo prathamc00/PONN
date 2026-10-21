@@ -39,4 +39,9 @@ coverage/
 *.zip
 *.msi
 backend/uploads/
-backend/logs/
+backend/logs/
+
+# Ignored subprojects
+php-backend/
+backend/
+main-frontend/
