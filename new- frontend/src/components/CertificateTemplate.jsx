@@ -69,12 +69,11 @@ export async function buildCertificateDataUrl(cert, userName, logoDataUrls) {
     year: 'numeric',
   });
 
-  const [ctaImg, msmeImg, signatureImg, stampImg, qrImg] = await Promise.all([
+  const [ctaImg, msmeImg, signatureImg, stampImg] = await Promise.all([
     tryLoadImg(logoDataUrls.cta),
     tryLoadImg(logoDataUrls.msme),
     tryLoadImg(logoDataUrls.signature),
     tryLoadImg(logoDataUrls.stamp),
-    tryLoadImg(`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`${window.location.origin}/verify/${cert.certificateId}`)}`),
   ]);
 
   const cv = document.createElement('canvas');
@@ -219,20 +218,13 @@ export async function buildCertificateDataUrl(cert, userName, logoDataUrls) {
 
   // ── BOTTOM LEFT: Verification QR & Official Registry Hash ──
   const footY = H - 50;
-  if (qrImg) {
-    c.drawImage(qrImg, startX, footY - 45, 52, 52);
-  }
-
   c.textAlign = 'left';
   c.fillStyle = '#4B5563';
   c.font = '11px "Times New Roman", Times, serif';
-  c.fillText('Official Issued Credential', startX + 62, footY - 28);
+  c.fillText('Issued Course Certificate', startX, footY - 14);
   c.font = 'bold 12px monospace';
   c.fillStyle = '#111827';
-  c.fillText(`ID: ${cert?.certificateId || 'CRISMATECH-VERIFIED'}`, startX + 62, footY - 12);
-  c.font = '10px "Times New Roman", Times, serif';
-  c.fillStyle = '#6B7280';
-  c.fillText(`Verify: ${window.location.origin}/verify/${cert?.certificateId}`, startX + 62, footY + 4);
+  c.fillText(`ID: ${cert?.certificateId || 'CRISMATECH'}`, startX, footY + 4);
 
   return cv.toDataURL('image/png', 1.0);
 }
@@ -452,23 +444,12 @@ export default function CertificateTemplate({
           zIndex: 1,
         }}
       >
-        {/* Left: Verification Badge & QR */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=56x56&data=${encodeURIComponent(`${window.location.origin}/verify/${cert?.certificateId}`)}`}
-            alt="Verify QR"
-            style={{ width: 50, height: 50, borderRadius: 4, border: '1px solid #e5e7eb', padding: 2, backgroundColor: '#ffffff' }}
-          />
-          <div>
-            <div style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Official Issued Credential
-            </div>
-            <div style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: 12, color: '#111827', marginTop: 2 }}>
-              ID: {cert?.certificateId || 'CRISMATECH-VERIFIED'}
-            </div>
-            <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 1 }}>
-              Scan to verify authentic ledger record
-            </div>
+        <div>
+          <div style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Issued Course Certificate
+          </div>
+          <div style={{ fontWeight: 'bold', fontSize: 12, color: '#111827', marginTop: 3 }}>
+            ID: {cert?.certificateId || 'CRISMATECH'}
           </div>
         </div>
 

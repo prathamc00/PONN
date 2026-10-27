@@ -497,7 +497,7 @@ export default function ManageUsers() {
                   <Upload size={18} />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-lg text-[#ea580c]">Bulk Onboard Students</h3>
+                  <h3 className="font-serif font-bold text-lg text-slate-900">Bulk Onboard Students</h3>
                   <p className="text-xs text-slate-500">Create multiple student accounts and enroll them in batch.</p>
                 </div>
               </div>

@@ -380,7 +380,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full py-3.5 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+                className="w-full py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
               >
                 {sendingOtp ? (
                   'Sending Verification Code...'
@@ -405,18 +405,7 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              {devCode && (
-                <div className="p-3 bg-secondary/10 border border-secondary/20 rounded-xl flex items-center justify-between gap-3 font-mono text-xs text-secondary">
-                  <span>Development Simulator Code: <strong>{devCode}</strong></span>
-                  <button
-                    type="button"
-                    onClick={() => setOtp(devCode)}
-                    className="px-2 py-1 bg-secondary text-white rounded text-[10px] font-bold cursor-pointer"
-                  >
-                    Insert Code
-                  </button>
-                </div>
-              )}
+
 
               <div>
                 <label className="block font-mono uppercase text-outline mb-2 text-center tracking-widest">
@@ -438,7 +427,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={busy || otp.length !== 6}
-                className="w-full py-3.5 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+                className="w-full py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
               >
                 {verifying ? (
                   'Verifying & Creating Account...'

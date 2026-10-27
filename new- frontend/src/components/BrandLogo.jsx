@@ -21,7 +21,7 @@ export default function BrandLogo({ alt = 'CRISMATECH', className = 'h-8 w-auto 
   if (hasError) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-serif font-bold text-xl text-primary tracking-tight">CRISMATECH</span>
+        <span className="font-serif font-extrabold text-xl text-primary tracking-tight">CRISMATECH</span>
       </div>
     );
   }

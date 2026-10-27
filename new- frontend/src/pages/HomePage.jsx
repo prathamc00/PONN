@@ -23,12 +23,12 @@ export default function HomePage() {
         <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center group">
-            <BrandLogo className="h-10 sm:h-11 w-auto object-contain transition-transform group-hover:scale-105" />
+            <BrandLogo className="h-10 sm:h-11 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-sm font-semibold text-[#ea580c] hover:text-[#9d4225] transition-colors">
+            <Link to="/" className="text-sm font-semibold text-[#07241a] hover:text-[#ea580c] transition-colors">
               Home
             </Link>
             {user ? (
@@ -41,9 +41,6 @@ export default function HomePage() {
                 <Lock size={12} className="text-slate-400" />
               </Link>
             )}
-            <Link to="/verify" className="text-sm font-medium text-slate-600 hover:text-[#ea580c] transition-colors">
-              Verify Certificate
-            </Link>
           </nav>
 
           {/* User Auth Buttons */}
@@ -113,13 +110,6 @@ export default function HomePage() {
                 Courses (Login Required)
               </Link>
             )}
-            <Link
-              to="/verify"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 text-base font-medium text-slate-700 rounded-lg hover:bg-slate-50"
-            >
-              Verify Certificate
-            </Link>
             <div className="pt-4 border-t border-slate-100 flex flex-col gap-2">
               {user ? (
                 <Link
@@ -159,13 +149,13 @@ export default function HomePage() {
             {/* Left Column: Headlines & CTA */}
             <div className="lg:col-span-7 xl:col-span-7 space-y-6">
               {/* Main Headline */}
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-[#ea580c] font-normal tracking-tight leading-[1.12]">
-                Master Practical Technical Skills for <span className="italic font-normal text-[#9d4225]">Real-World</span> Careers.
+              <h1 className="font-serif max-w-4xl text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-slate-900 font-bold tracking-[-0.04em] leading-[1.04]">
+                CRISMATECH courses, assignments, tests, and certificates in one portal.
               </h1>
 
               {/* Subheading */}
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-3xl">
-                Official online training portal for CRISMATECH students. Access structured lessons, submit project assignments, take timed assessments, and receive verified digital credentials.
+              <p className="text-base sm:text-lg text-slate-600 leading-7 max-w-2xl">
+                Sign in to view your enrolled courses, submit work, take scheduled assessments, and download certificates issued by CRISMATECH.
               </p>
 
               {/* Action Buttons */}
@@ -173,7 +163,7 @@ export default function HomePage() {
                 {user ? (
                   <Link
                     to={user.role === 'admin' || user.role === 'instructor' ? '/admin/dashboard' : '/dashboard'}
-                    className="px-7 py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="px-7 py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-colors shadow-md"
                   >
                     <span>Open Student Dashboard</span>
                     <ArrowRight size={18} />
@@ -182,7 +172,7 @@ export default function HomePage() {
                   <>
                     <Link
                       to="/login"
-                      className="px-7 py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                      className="px-7 py-3.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold rounded-xl text-sm sm:text-base inline-flex items-center gap-2 transition-colors shadow-md"
                     >
                       <UserCheck size={18} />
                       <span>Student Sign In</span>
@@ -203,7 +193,7 @@ export default function HomePage() {
               <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-xl space-y-5">
                 <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
                     <span className="text-xs font-mono uppercase font-bold text-slate-500">
                       STUDENT LEARNING GATEWAY
                     </span>
@@ -223,7 +213,7 @@ export default function HomePage() {
                         <span>Course Modules & Lectures</span>
                         {!user && <Lock size={11} className="text-slate-400" />}
                       </div>
-                      <div className="text-[11px] text-slate-500">Interactive video sessions & downloadable study PDFs</div>
+                      <div className="text-[11px] text-slate-500">Recorded lessons and downloadable course files</div>
                     </div>
                   </div>
 
@@ -258,8 +248,8 @@ export default function HomePage() {
                       <Award size={18} />
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-slate-800">Verified Credentials</div>
-                      <div className="text-[11px] text-slate-500">Tamper-proof digital certificates with live QR verification</div>
+                      <div className="text-xs font-bold text-slate-800">Course Certificates</div>
+                      <div className="text-[11px] text-slate-500">Download certificates issued to your account</div>
                     </div>
                   </div>
                 </div>
@@ -300,11 +290,11 @@ export default function HomePage() {
                 <Code2 size={13} className="text-[#9d4225]" />
                 Academic Specializations
               </span>
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#ea580c] font-normal tracking-tight mt-2">
-                Technical Tracks & Core Curricula
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-bold tracking-tight mt-2">
+                Available technical tracks
               </h2>
               <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-                Engineered to meet contemporary software engineering benchmarks. Enrolled students gain hands-on proficiency through practical code reviews and live labs.
+                Review the subjects and tools covered in each track. Sign in to see the current syllabus and your enrolled modules.
               </p>
             </div>
             <div className="shrink-0">
@@ -345,7 +335,7 @@ export default function HomePage() {
                   Full-Stack Web Architecture
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Enterprise application engineering using modern component architectures, state systems, relational schema design, and authenticated REST APIs.
+                  React interfaces, application state, relational database design, and authenticated REST APIs.
                 </p>
                 <div className="mt-4 pt-3 border-t border-slate-200/60">
                   <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-1.5">Key Technologies:</span>
@@ -388,7 +378,7 @@ export default function HomePage() {
                   Data Science & Machine Learning
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Statistical data exploration, predictive modeling, machine learning pipelines, and generative neural integration with production APIs.
+                  Statistical analysis, predictive models, machine learning workflows, and model integration with APIs.
                 </p>
                 <div className="mt-4 pt-3 border-t border-slate-200/60">
                   <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-1.5">Key Technologies:</span>
@@ -431,7 +421,7 @@ export default function HomePage() {
                   Cloud DevOps & Containerization
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Automated CI/CD workflows, Linux system administration, container runtime orchestration, reverse proxy configurations, and TLS management.
+                  CI/CD workflows, Linux administration, Docker containers, reverse proxies, and TLS configuration.
                 </p>
                 <div className="mt-4 pt-3 border-t border-slate-200/60">
                   <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-1.5">Key Technologies:</span>
@@ -474,7 +464,7 @@ export default function HomePage() {
                   Database Systems & Data Security
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Relational modeling, query execution plans, indexing strategies, parameterized transactional safety, and defense against injection vectors.
+                  Relational modeling, query plans, indexes, transactions, parameterized queries, and database access controls.
                 </p>
                 <div className="mt-4 pt-3 border-t border-slate-200/60">
                   <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-1.5">Key Technologies:</span>
@@ -513,11 +503,11 @@ export default function HomePage() {
               <GraduationCap size={14} className="text-emerald-600" />
               Academic Workflow
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#ea580c] font-normal tracking-tight mt-2">
-              How Students Complete & Earn Verifiable Credentials
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-bold tracking-tight mt-2">
+              How course completion works
             </h2>
             <p className="text-sm text-slate-600 mt-1">
-              Every course at CRISMATECH adheres to a transparent, verified progression standard to ensure every credential carries rigorous academic integrity.
+              Course requirements are shown in the student portal. The usual sequence is coursework, submission, assessment, and certificate issuance.
             </p>
           </div>
 
@@ -525,7 +515,7 @@ export default function HomePage() {
             {/* Step 1 */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-full bg-[#ea580c] text-white flex items-center justify-center font-mono font-bold text-xs">
+                <span className="w-8 h-8 rounded-full bg-[#07241a] text-white flex items-center justify-center font-mono font-bold text-xs">
                   01
                 </span>
                 <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">Phase 1</span>
@@ -545,7 +535,7 @@ export default function HomePage() {
             {/* Step 2 */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-full bg-[#ea580c] text-white flex items-center justify-center font-mono font-bold text-xs">
+                <span className="w-8 h-8 rounded-full bg-[#07241a] text-white flex items-center justify-center font-mono font-bold text-xs">
                   02
                 </span>
                 <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">Phase 2</span>
@@ -565,7 +555,7 @@ export default function HomePage() {
             {/* Step 3 */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <span className="w-8 h-8 rounded-full bg-[#ea580c] text-white flex items-center justify-center font-mono font-bold text-xs">
+                <span className="w-8 h-8 rounded-full bg-[#07241a] text-white flex items-center justify-center font-mono font-bold text-xs">
                   03
                 </span>
                 <span className="text-[11px] font-mono text-slate-400 font-bold uppercase">Phase 3</span>
@@ -591,14 +581,14 @@ export default function HomePage() {
                 <span className="text-[11px] font-mono text-emerald-700 font-bold uppercase">Phase 4</span>
               </div>
               <h3 className="font-bold text-base text-slate-900">
-                Verifiable Credential Issuance
+                Certificate Issuance
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Upon meeting course requirements, an immutable certificate is generated with a unique certificate serial, SHA-256 validation hash, and permanent QR verification link.
+                After the recorded course requirements are met, CRISMATECH can issue a certificate to the student account.
               </p>
               <div className="text-[11px] font-mono text-emerald-700 flex items-center gap-1">
                 <Check size={13} />
-                <span>1-Click LinkedIn Add & PDF</span>
+                <span>Certificate PDF download</span>
               </div>
             </div>
           </div>
@@ -635,20 +625,20 @@ export default function HomePage() {
             <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
                 <ShieldCheck size={16} className="text-emerald-700" />
-                <span>Digital Credential Integrity</span>
+                <span>Certificate Access</span>
               </div>
               <ul className="text-xs text-slate-600 space-y-2 leading-relaxed">
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold">•</span>
-                  <span><strong>Direct Verification:</strong> Every certificate includes an authentic, tamper-proof verification link.</span>
+                  <span><strong>Student Access:</strong> Issued certificates appear in the student's dashboard.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold">•</span>
-                  <span><strong>Performance Records:</strong> Credentials validate completed modules, assignments, and exam grades.</span>
+                  <span><strong>Certificate Record:</strong> Each certificate displays its course, recipient, and issue date.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-600 font-bold">•</span>
-                  <span><strong>LinkedIn Compatible:</strong> Add earned credentials directly into your professional profile with one click.</span>
+                  <span><strong>Download:</strong> Students can save or print the certificate from their account.</span>
                 </li>
               </ul>
             </div>
@@ -664,7 +654,7 @@ export default function HomePage() {
               </p>
               <div className="pt-2 text-xs font-mono space-y-1.5 text-slate-700">
                 <div><strong>Email:</strong> <a href="mailto:director@crismatech.com" className="text-emerald-800 hover:underline">director@crismatech.com</a></div>
-                <div><strong>Support Hours:</strong> Mon – Sat, 9:00 AM – 6:00 PM IST</div>
+                <div><strong>Support Hours:</strong> Mon to Sat, 9:00 AM to 6:00 PM IST</div>
                 <div><strong>Phone:</strong> <a href="tel:+919108118381" className="text-emerald-800 hover:underline">+91 9108118381</a></div>
               </div>
             </div>
@@ -681,7 +671,7 @@ export default function HomePage() {
               <BrandLogo className="h-9 w-auto object-contain" />
             </div>
             <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
-              Official learning and certification portal for CRISMATECH students. Structured curricula designed around practical industry development and verified credentials.
+              CRISMATECH student portal for course materials, submissions, assessments, attendance, and issued certificates.
             </p>
             <div className="text-xs font-mono text-slate-500 space-y-1 pt-1">
               <div>Email: <a href="mailto:director@crismatech.com" className="text-slate-800 hover:underline">director@crismatech.com</a></div>
@@ -695,7 +685,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="CRISMATECH on LinkedIn"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-[#0077b5] text-slate-600 hover:text-white flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-[#0077b5] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
@@ -706,7 +696,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="CRISMATECH on Instagram"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-[#E4405F] text-slate-600 hover:text-white flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-[#E4405F] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
@@ -717,7 +707,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="CRISMATECH on X"
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-black text-slate-600 hover:text-white flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-black text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
               >
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -735,7 +725,6 @@ export default function HomePage() {
               <li><Link to="/login" className="hover:text-[#ea580c] transition-colors">Student Login</Link></li>
               <li><Link to="/register" className="hover:text-[#ea580c] transition-colors">Create Student Account</Link></li>
               <li><Link to="/forgot-password" className="hover:text-[#ea580c] transition-colors">Reset Password</Link></li>
-              <li><Link to="/verify" className="hover:text-[#ea580c] transition-colors">Verify Certificate</Link></li>
             </ul>
           </div>
 

@@ -69,41 +69,6 @@ router.get('/my-certificates', authenticate, async (req, res, next) => {
   }
 });
 
-// ── GET /api/certificates/verify/:certId (Public) ─────────────────────────────
-router.get('/verify/:certId', async (req, res, next) => {
-  try {
-    const certCode = req.params.certId;
-    const [rows] = await pool.execute(
-      `SELECT cert.*, 
-              u.name as studentName, u.college as studentCollege, u.branch as studentBranch,
-              c.title as courseTitle, c.category as courseCategory, c.instructor as courseInstructor
-       FROM certificates cert
-       JOIN users u ON u.id = cert.student
-       LEFT JOIN courses c ON c.id = cert.course
-       WHERE cert.certificateId = ?`,
-      [certCode]
-    );
-
-    if (!rows[0]) {
-      return fail(res, 404, 'Certificate not found or verification code is invalid');
-    }
-
-    const cert = normalizeCert(rows[0]);
-    // Protect student privacy on public endpoints (no private email exposure)
-    cert.student.email = '';
-    cert.user.email = '';
-
-    res.json({
-      success: true,
-      verified: true,
-      certificate: cert,
-      message: `Verified: Issued by CRISMATECH Education to ${cert.student.name} for ${cert.course.title}`,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 // ── GET /api/certificates (Admin) ─────────────────────────────────────────────
 router.get('/', authenticate, adminOnly, async (_req, res, next) => {
   try {

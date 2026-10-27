@@ -210,7 +210,7 @@ export default function CourseDetailPage() {
               <div className="space-y-4">
                 <div>
                   <span className="font-mono text-xs uppercase text-slate-400 block font-semibold">Course Enrollment</span>
-                  <span className="text-sm font-bold text-[#ea580c] mt-1 block">Ready to Start Learning</span>
+                  <span className="text-sm font-bold text-[#07241a] mt-1 block">Ready to Start Learning</span>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Enroll now to unlock video lectures, download laboratory assets, and earn your verified certificate.
                   </p>

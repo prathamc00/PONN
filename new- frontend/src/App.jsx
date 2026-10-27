@@ -9,7 +9,6 @@ import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
-import VerifyCertificatePage from './pages/VerifyCertificatePage.jsx';
 
 // Layouts
 import DashboardLayout from './components/DashboardLayout.jsx';
@@ -140,11 +139,6 @@ export default function App() {
       <Route path="/portal/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/portal/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/verify" element={<VerifyCertificatePage />} />
-      <Route path="/verify/:certId" element={<VerifyCertificatePage />} />
-      <Route path="/portal/verify" element={<VerifyCertificatePage />} />
-      <Route path="/portal/verify/:certId" element={<VerifyCertificatePage />} />
-      <Route path="/credentials/:certId" element={<VerifyCertificatePage />} />
 
       {/* Student Portal Routes */}
       <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

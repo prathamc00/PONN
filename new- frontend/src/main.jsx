@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')).render(
               color: '#fff',
               borderRadius: '0.5rem',
               border: '1px solid #9a3412',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             },
           }}
         />

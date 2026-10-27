@@ -5,38 +5,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // CRISMATECH Brand Theme (Orange & Terracotta)
-        primary: '#ea580c', // Crismatech Vibrant Orange
-        'primary-container': '#c2410c', // Deep Rich Orange
+        // CRISMATECH Brand Theme (Dark Forest/Slate with Signature Orange Accents)
+        primary: '#07241a', // Deep Forest / Charcoal
+        'primary-container': '#1e3a2f', // Forest Green
         'on-primary': '#ffffff',
-        'on-primary-container': '#ffedd5',
+        'on-primary-container': '#caeada',
         'primary-fixed': '#ffedd5',
         'primary-fixed-dim': '#fed7aa',
 
-        secondary: '#9d4225', // Ochre / Terracotta
-        'secondary-container': '#c25e3e',
+        secondary: '#ea580c', // Crismatech Brand Orange
+        'secondary-container': '#c2410c',
         'on-secondary': '#ffffff',
-        'on-secondary-container': '#ffdbd0',
+        'on-secondary-container': '#ffedd5',
 
-        accent: '#f97316', // Bright Orange Accent
+        accent: '#f97316', // Orange Accent
         'accent-container': '#ea580c',
         'on-accent': '#ffffff',
 
-        background: '#fffbf9',
+        background: '#f8fafc',
         surface: '#ffffff',
-        'on-surface': '#1c1917',
-        'on-surface-variant': '#57534e',
+        'on-surface': '#0f172a',
+        'on-surface-variant': '#475569',
 
         'surface-dim': '#f1f5f9',
         'surface-bright': '#ffffff',
         'surface-container-lowest': '#ffffff',
         'surface-container-low': '#ffffff',
-        'surface-container': '#f4ece8',
-        'surface-container-high': '#e9e1dd',
+        'surface-container': '#f1f5f9',
+        'surface-container-high': '#e2e8f0',
         'surface-container-highest': '#cbd5e1',
         'surface-variant': '#f8fafc',
 
-        'on-background': '#1c1917',
+        'on-background': '#0f172a',
         outline: '#727974',
         'outline-variant': '#e2e8f0',
 
@@ -47,11 +47,11 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        headline: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Manrope', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        headline: ['Manrope', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         body: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
-        serif: ['Newsreader', 'Georgia', 'serif'],
+        mono: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        serif: ['Manrope', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       boxShadow: {
         card: '0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)',

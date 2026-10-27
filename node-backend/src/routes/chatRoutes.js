@@ -197,7 +197,7 @@ async function processStudentQuery(query, user) {
 
         if (certs && certs.length > 0) {
           const certList = certs
-            .map((c) => `* **${c.title}** (Score: ${c.scorePercent}%) — Credential ID: \`${c.certificateId}\` — [Verify](/verify/${c.certificateId})`)
+            .map((c) => `* **${c.title}** (Score: ${c.scorePercent}%) | Certificate ID: \`${c.certificateId}\``)
             .join('\n');
 
           return {

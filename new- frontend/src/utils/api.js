@@ -56,7 +56,6 @@ export async function apiFetch(path, options = {}) {
     !path.includes('/login') &&
     !path.includes('/register') &&
     !path.includes('/forgot-password') &&
-    !path.includes('/verify') &&
     !path.includes('/otp') &&
     !path.includes('/chat')
   ) {

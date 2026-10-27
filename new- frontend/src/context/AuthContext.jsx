@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { apiFetch, setToken, clearAuth, getStoredUser, setStoredUser, getToken } from '../utils/api';
 
 const AuthContext = createContext(undefined);
@@ -57,10 +57,13 @@ export function AuthProvider({ children }) {
         body: JSON.stringify(formData),
       });
       if (!data.success) throw new Error(data.message || 'Registration failed');
-      setToken(data.token);
-      setTokenState(data.token);
-      setUser(data.user);
-      setStoredUser(data.user);
+      if (data.token) {
+        setToken(data.token);
+        setTokenState(data.token);
+        setUser(data.user);
+        setStoredUser(data.user);
+      }
+      return data;
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Award, ShieldCheck, Download, Copy, ExternalLink, Share2, RefreshCw, Printer, Maximize2, X, ZoomIn, ZoomOut, Check
+  Award, Download, Share2, RefreshCw, Printer, Maximize2, X, ZoomIn, ZoomOut
 } from 'lucide-react';
 import { apiFetch } from '../utils/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -18,7 +18,6 @@ export default function CertificatePage() {
   const [selectedCert, setSelectedCert] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
 
@@ -137,26 +136,17 @@ export default function CertificatePage() {
     }
   };
 
-  const handleCopyLink = (certId) => {
-    const url = `${window.location.origin}/verify/${certId}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    showSuccess('Link Copied', 'Public verification URL copied to your clipboard.');
-  };
-
   const handleAddToLinkedIn = (cert) => {
     if (!cert) return;
     const title = encodeURIComponent((cert.course?.title || cert.courseTitle || cert.title || 'Course') + ' — Course Completion');
     const orgName = encodeURIComponent('Crismatech Automation');
-    const certUrl = encodeURIComponent(`${window.location.origin}/verify/${cert.certificateId}`);
     const certId = encodeURIComponent(cert.certificateId);
     const rawDate = cert.earnedDate || cert.issuedAt || cert.createdAt || Date.now();
     const dateObj = new Date(rawDate);
     const issueYear = dateObj.getFullYear();
     const issueMonth = dateObj.getMonth() + 1;
 
-    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${title}&organizationName=${orgName}&issueYear=${issueYear}&issueMonth=${issueMonth}&certUrl=${certUrl}&certId=${certId}`;
+    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${title}&organizationName=${orgName}&issueYear=${issueYear}&issueMonth=${issueMonth}&certId=${certId}`;
     window.open(linkedInUrl, '_blank');
   };
 
@@ -172,7 +162,7 @@ export default function CertificatePage() {
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2 h-2 rounded-full bg-[#6D28D9] animate-pulse" />
             <span className="font-mono text-[10px] sm:text-xs uppercase tracking-widest text-outline">
-              Verified Academic Credentials
+              Issued Course Certificates
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-primary">Your Certificates</h1>
@@ -203,28 +193,11 @@ export default function CertificatePage() {
 
             {/* Secondary Action Grid / Bar */}
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
-              <a
-                href={`/verify/${selectedCert.certificateId}`}
-                target="_blank"
-                rel="noreferrer"
-                className="px-3 py-2 bg-surface hover:bg-surface-container active:bg-surface-container-high border border-outline-variant text-on-surface rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-              >
-                <ExternalLink size={13} /> <span>Verify</span>
-              </a>
-
               <button
                 onClick={() => handleAddToLinkedIn(selectedCert)}
                 className="px-3 py-2 bg-[#0077b5] hover:bg-[#006097] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
               >
                 <Share2 size={13} /> <span>LinkedIn</span>
-              </button>
-
-              <button
-                onClick={() => handleCopyLink(selectedCert.certificateId)}
-                className="px-3 py-2 bg-surface hover:bg-surface-container border border-outline-variant text-on-surface rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-              >
-                {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
-                <span>{copied ? 'Copied' : 'Copy Link'}</span>
               </button>
 
               <button
@@ -317,9 +290,6 @@ export default function CertificatePage() {
                     <span>Zoom In</span>
                   </button>
 
-                  <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-[11px] font-mono font-bold">
-                    <ShieldCheck size={13} /> <span>Verified</span>
-                  </div>
                 </div>
               </div>
 

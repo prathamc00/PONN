@@ -128,12 +128,6 @@ export default function LoginPage() {
                 Register as Student
               </Link>
             </div>
-            <div>
-              Need to verify a credential?{' '}
-              <Link to="/verify" className="text-slate-700 font-medium hover:underline">
-                Certificate Verification Portal
-              </Link>
-            </div>
           </div>
         </div>
       </div>

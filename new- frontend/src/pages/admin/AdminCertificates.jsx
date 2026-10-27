@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Award, Plus, Trash2, Search, ExternalLink, CheckCircle, ShieldCheck
+  Award, Plus, Trash2, Search, CheckCircle, ShieldCheck
 } from 'lucide-react';
 import { apiFetch } from '../../utils/api.js';
 import { showConfirm, showSuccess, showError } from '../../utils/dialog.js';
@@ -67,7 +67,7 @@ export default function AdminCertificates() {
   const handleRevoke = async (id, certId) => {
     const ok = await showConfirm({
       title: 'Revoke Certificate?',
-      text: `Are you sure you want to revoke credential ${certId}? Public verification will reflect revoked status.`,
+      text: `Are you sure you want to revoke certificate ${certId}? It will no longer be available to the student.`,
       confirmText: 'Revoke',
     });
     if (!ok) return;
@@ -86,10 +86,10 @@ export default function AdminCertificates() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant pb-6">
         <div>
-          <span className="font-mono text-xs uppercase tracking-widest text-outline">Verified Academic Records</span>
+          <span className="font-mono text-xs uppercase tracking-widest text-outline">Issued Academic Records</span>
           <h1 className="text-3xl md:text-4xl font-serif text-primary mt-1">Certificates Desk</h1>
           <p className="text-on-surface-variant text-sm mt-1">
-            Manage verifiable student credentials, cryptographic certificate IDs, and administrative issuances.
+            Issue, review, and revoke student course certificates.
           </p>
         </div>
         <button
@@ -127,9 +127,6 @@ export default function AdminCertificates() {
                         <span className="font-mono font-bold text-primary block text-sm">
                           {cert.certificateId}
                         </span>
-                        <span className="font-mono text-outline text-[10px] block truncate max-w-[200px]">
-                          {cert.verificationHash || '0x49B28F104C74DA88A3190C62912'}
-                        </span>
                       </td>
 
                       <td className="p-4">
@@ -164,14 +161,6 @@ export default function AdminCertificates() {
                       </td>
 
                       <td className="p-4 text-right space-x-2">
-                        <a
-                          href={`/verify/${cert.certificateId}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 bg-surface hover:bg-surface-container border border-outline-variant text-on-surface rounded text-[11px] font-medium inline-flex items-center gap-1"
-                        >
-                          Verify ↗
-                        </a>
                         {!isRevoked && (
                           <button
                             onClick={() => handleRevoke(cId, cert.certificateId)}
